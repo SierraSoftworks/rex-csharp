@@ -1,7 +1,7 @@
 # Randy 
 **Keep track of various ideas and randomly select one on demand**
 
-[![Travis (.com)](https://img.shields.io/travis/com/SierraSoftworks/randy-csharp.svg?style=for-the-badge)](https://travis-ci.com/SierraSoftworks/randy-rs)
+[![Travis (.com)](https://img.shields.io/travis/com/SierraSoftworks/randy-csharp.svg?style=for-the-badge)](https://travis-ci.com/SierraSoftworks/randy-csharp)
 [![API docs](https://img.shields.io/badge/docs-api-blue.svg?style=for-the-badge)](https://randyapp.docs.apiary.io)
 ![GitHub](https://img.shields.io/github/license/SierraSoftworks/randy-csharp.svg?style=for-the-badge)
 
