@@ -1,6 +1,6 @@
-﻿using Randy.API.Models;
+﻿using Randy.Models;
 
-namespace Randy.API.Views
+namespace Randy.Views
 {
     public interface IModelView<in T>
         where T : IModel

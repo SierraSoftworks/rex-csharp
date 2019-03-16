@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Randy.API.Stores
+namespace Randy.Stores
 {
     public class IdeaStore
     {

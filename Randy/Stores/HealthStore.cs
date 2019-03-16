@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Randy.API.Stores
+namespace Randy.Stores
 {
     public class HealthStore
     {

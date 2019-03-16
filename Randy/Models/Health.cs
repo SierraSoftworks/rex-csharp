@@ -1,7 +1,7 @@
 using System;
-using Randy.API.Views;
+using Randy.Views;
 
-namespace Randy.API.Models
+namespace Randy.Models
 {
     public class Health : IModel<Health>
     {

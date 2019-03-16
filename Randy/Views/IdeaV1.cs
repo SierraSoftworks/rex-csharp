@@ -1,19 +1,26 @@
 using System;
-using Randy.API.Models;
+using System.Xml.Serialization;
+using Randy.Models;
 
-namespace Randy.API.Views
+namespace Randy.Views
 {
+    [XmlType("Idea")]
     public class IdeaV1 : IModelView<Models.Idea>, IModelSource<Models.Idea>
     {
-        public Guid? Id { get; set; }
 
+        [XmlAttribute("Id")]
+        public string Id { get; set; }
+
+
+        [XmlElement("Name")]
         public string Name { get; set; }
 
+        [XmlElement("Description")]
         public string Description { get; set; }
 
         public void FromModel(Idea model)
         {
-            this.Id = model.Id;
+            this.Id = model.Id.ToString("N");
             this.Name = model.Name;
             this.Description = model.Description;
         }
@@ -22,7 +29,7 @@ namespace Randy.API.Views
         {
             return new Idea
             {
-                Id = this.Id ?? Guid.NewGuid(),
+                Id = this.Id != null ? Guid.Parse(this.Id) : Guid.NewGuid(),
                 Name = this.Name,
                 Description = this.Description,
                 Completed = false,

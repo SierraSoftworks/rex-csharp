@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Randy.API
+namespace Randy
 {
     public static class Extensions
     {

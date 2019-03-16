@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Randy.API/Randy.API.csproj"
+                "${workspaceFolder}/Randy/Randy.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

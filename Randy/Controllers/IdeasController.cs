@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Randy.API.Controllers
+namespace Randy.Controllers
 {
     public abstract class IdeaController<T> : ControllerBase
         where T : class, Views.IModelView<Models.Idea>, Views.IModelSource<Models.Idea>, new()
@@ -14,7 +14,7 @@ namespace Randy.API.Controllers
         protected Stores.IdeaStore Store { get; }
 
         [HttpGet]
-        [Route("api/v{version:apiVersion}/idea/{id:Guid}")]
+        [Route("api/v{version:apiVersion}/idea/{id:Guid}", Name = "GetIdea")]
         public virtual async Task<ActionResult<T>> Get(Guid id) => (await this.Store.GetIdeaAsync(id))?.ToView<T>()?.ToActionResult() ?? new NotFoundResult();
 
 
@@ -39,7 +39,12 @@ namespace Randy.API.Controllers
 
         [HttpPost]
         [Route("api/v{version:apiVersion}/ideas")]
-        public virtual async Task<T> Add(T idea) => (await this.Store.StoreIdeaAsync(idea.ToModel())).ToView<T>();
+        public virtual async Task<ActionResult<T>> Add(T idea)
+        {
+            var addedIdea = await this.Store.StoreIdeaAsync(idea.ToModel());
+
+            return this.CreatedAtRoute("GetIdea", new { version = this.RouteData.Values["version"], id = addedIdea.Id.ToString("N") }, addedIdea.ToView<T>());
+        }
     }
 
     [ApiVersion("1.0")]

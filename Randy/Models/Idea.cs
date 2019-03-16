@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Randy.API.Views;
+using Randy.Views;
 
-namespace Randy.API.Models
+namespace Randy.Models
 {
     public class Idea : IModel<Idea>
     {

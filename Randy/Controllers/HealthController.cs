@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Randy.API.Controllers
+namespace Randy.Controllers
 {
     public abstract class HealthController<T> : ControllerBase
         where T : Views.IModelView<Models.Health>, new()
