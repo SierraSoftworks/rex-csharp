@@ -12,7 +12,11 @@
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview3-19153-02" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="3.1.2" />
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0-preview3-19153-02" />
+=======
+    <PackageReference Include="Sentry.AspNetCore" Version="1.1.2" />
+>>>>>>> master
   </ItemGroup>
   
   <ItemGroup>

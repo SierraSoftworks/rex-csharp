@@ -20,6 +20,7 @@ namespace Randy
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseSentry("https://b7ca8a41e8e84fef889e4f428071dab2@sentry.io/1415519")
                 .UseStartup<Startup>();
     }
 }
