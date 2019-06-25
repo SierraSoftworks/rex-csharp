@@ -1,0 +1,47 @@
+pool:
+  name: Hosted Windows 2019 with VS2019
+
+variables:
+  "dotnetcore.version": "3.0.100-preview6-012264"
+
+steps:
+- task: gittools.gitversion.gitversion-task.GitVersion@4
+  displayName: GitVersion
+  inputs:
+    updateAssemblyInfo: true
+    preferBundledVersion: false
+
+- task: DotNetCoreInstaller@0
+  displayName: 'Use .NET Core SDK $(dotnetcore.version)'
+  inputs:
+    version: '$(dotnetcore.version)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: test
+    arguments: '--collect "Code coverage"'
+    testRunTitle: 'General Tests'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: Rex/Rex.csproj
+    arguments: '-o $(Build.ArtifactStagingDirectory) --self-contained --runtime linux-x64'
+
+- task: PublishSymbols@2
+  displayName: 'Publish symbols path'
+  inputs:
+    SymbolServerType: TeamServices
+    SymbolsProduct: '$(Build.DefinitionName)'
+    SymbolsVersion: '$(GitVersion.SemVer)'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    ArtifactName: rex
