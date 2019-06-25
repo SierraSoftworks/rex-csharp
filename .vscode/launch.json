@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Randy/bin/Debug/netcoreapp2.2/Randy.dll",
+            "program": "${workspaceFolder}/Rex/bin/Debug/netcoreapp3.0/Rex.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Randy",
+            "cwd": "${workspaceFolder}/Rex",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
             "launchBrowser": {
