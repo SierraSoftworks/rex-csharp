@@ -140,7 +140,7 @@ namespace Rex.Stores
                 Name = this.Name,
                 Description = this.Description,
                 Completed = this.Completed,
-                Tags = this.Tags.Split(",").Select(t => t.Trim()).ToHashSet()
+                Tags = this.Tags.Split(",").Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToHashSet()
             };
         }
     }
