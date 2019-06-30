@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Rex.Models;
+using Rex.Stores;
 
 namespace Rex.Controllers
 {
     [Area("v1")]
     [ApiController]
     [Authorize(Roles = "Administrator")]
-    public class IdeaV1Controller : IdeaController<Views.IdeaV1>
+    public class IdeaV1Controller : IdeaController<Idea.Version1>
     {
-        public IdeaV1Controller(Stores.IIdeaStore store, ILogger<IdeaV1Controller> logger) : base(store, logger) { }
+        public IdeaV1Controller(IIdeaStore store, IRepresenter<Idea, Idea.Version1> representer, ILogger<IdeaController<Idea.Version1>> logger) : base(store, representer, logger)
+        {
+        }
     }
 }

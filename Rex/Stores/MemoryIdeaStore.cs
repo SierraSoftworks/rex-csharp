@@ -60,9 +60,7 @@ namespace Rex.Stores
             {
                 this.lockSlim.EnterReadLock();
                 foreach (var idea in this._state.GetValueOrDefault(collection)?.Values?.ToArray() ?? Array.Empty<Models.Idea>())
-                {
                     yield return idea;
-                }
             }
             finally
             {
@@ -76,9 +74,7 @@ namespace Rex.Stores
             {
                 this.lockSlim.EnterReadLock();
                 foreach (var idea in this._state.GetValueOrDefault(collection)?.Values?.Where(predicate)?.ToArray() ?? Array.Empty<Models.Idea>())
-                {
                     yield return idea;
-                }
             }
             finally
             {

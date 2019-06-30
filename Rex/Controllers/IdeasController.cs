@@ -1,26 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Rex.Models;
 
 namespace Rex.Controllers
 {
     public abstract class IdeaController<T> : ControllerBase
-        where T : class, Views.IModelView<Models.Idea>, Views.IModelSource<Models.Idea>, new()
+        where T : class, IView<Idea>
     {
         private readonly ILogger<IdeaController<T>> logger;
 
-        public IdeaController(Stores.IIdeaStore store, ILogger<IdeaController<T>> logger)
+        public IdeaController(Stores.IIdeaStore store, IRepresenter<Idea, T> representer, ILogger<IdeaController<T>> logger)
         {
             Store = store;
+            Representer = representer;
             this.logger = logger;
         }
 
         protected Stores.IIdeaStore Store { get; }
+
+        protected IRepresenter<Idea, T> Representer { get; }
 
         protected Guid DefaultUserCollection()
         {
@@ -31,14 +34,30 @@ namespace Rex.Controllers
         [Route("api/[area]/idea/{id:Guid}", Name = "GetIdea.[area]")]
         [Route("api/[area]/collection/{collection:Guid}/idea/{id:Guid}", Name = "GetIdeaByCollection.[area]")]
         [Authorize("Ideas.Read", Roles = "Administrator,User")]
-        public virtual async Task<ActionResult<T>> Get(Guid id, Guid? collection) => (await this.Store.GetIdeaAsync(collection ?? this.DefaultUserCollection(), id))?.ToView<T>()?.ToActionResult() ?? new NotFoundResult();
+        public virtual async Task<ActionResult<T>> Get(Guid id, Guid? collection)
+        {
+            var model = await this.Store.GetIdeaAsync(collection ?? this.DefaultUserCollection(), id);
+
+            if (model == null)
+                return NotFound();
+
+            return Representer.ToView(model);
+        }
 
 
         [HttpGet]
         [Route("api/[area]/idea/random", Name = "GetRandomIdea.[area]")]
         [Route("api/[area]/collection/{collection:Guid}/idea/random", Name = "GetRandomIdeaByCollection.[area]")]
         [Authorize("Ideas.Read", Roles = "Administrator,User")]
-        public virtual async Task<ActionResult<T>> GetRandom(Guid? collection) => (await this.Store.GetRandomIdeaAsync(collection ?? this.DefaultUserCollection()))?.ToView<T>()?.ToActionResult() ?? new NotFoundResult();
+        public virtual async Task<ActionResult<T>> GetRandom(Guid? collection)
+        {
+            var model = await this.Store.GetRandomIdeaAsync(collection ?? this.DefaultUserCollection());
+
+            if (model == null)
+                return NotFound();
+
+            return Representer.ToView(model);
+        }
 
 
         [HttpPut]
@@ -52,7 +71,7 @@ namespace Rex.Controllers
                 return this.BadRequest();
             }
 
-            var model = idea.ToModel();
+            var model = Representer.ToModel(idea);
             model.Id = id;
             model.CollectionId = collection ?? model.CollectionId;
 
@@ -62,14 +81,16 @@ namespace Rex.Controllers
             }
 
             model = await this.Store.StoreIdeaAsync(model);
-            return model.ToView<T>();
+
+            return Representer.ToView(model);
         }
 
         [HttpGet]
         [Route("api/[area]/ideas", Name = "GetIdeas.[area]")]
         [Route("api/[area]/collection/{collection:Guid}/ideas", Name = "GetIdeasByCollection.[area]")]
         [Authorize("Ideas.Read", Roles = "Administrator,User")]
-        public virtual async Task<IEnumerable<T>> List(Guid? collection) => (await this.Store.GetIdeasAsync(collection ?? this.DefaultUserCollection()).ToEnumerable()).Select(x => x.ToView<T>());
+        public virtual async Task<IEnumerable<T>> List(Guid? collection) =>
+            (await this.Store.GetIdeasAsync(collection ?? this.DefaultUserCollection()).ToEnumerable()).Select(Representer.ToView);
 
 
         [HttpPost]
@@ -78,7 +99,7 @@ namespace Rex.Controllers
         [Authorize("Ideas.Write", Roles = "Administrator,User")]
         public virtual async Task<ActionResult<T>> Add(T idea, Guid? collection)
         {
-            var model = idea.ToModel();
+            var model = Representer.ToModel(idea);
             if (collection.HasValue)
             {
                 model.CollectionId = collection.Value;
@@ -94,9 +115,9 @@ namespace Rex.Controllers
             var area = this.RouteData.Values["area"];
 
             if (model.CollectionId == this.DefaultUserCollection())
-                return this.CreatedAtRoute($"GetIdea.{area}", new { id = addedIdea.Id.ToString("N") }, addedIdea.ToView<T>());
+                return this.CreatedAtRoute($"GetIdea.{area}", new { id = addedIdea.Id.ToString("N") }, Representer.ToView(addedIdea));
             else
-                return this.CreatedAtRoute($"GetIdeaByCollection.{area}", new { collection = addedIdea.CollectionId.ToString("N"), id = addedIdea.Id.ToString("N") }, addedIdea.ToView<T>());
+                return this.CreatedAtRoute($"GetIdeaByCollection.{area}", new { collection = addedIdea.CollectionId.ToString("N"), id = addedIdea.Id.ToString("N") }, Representer.ToView(addedIdea));
 
         }
 
@@ -114,7 +135,7 @@ namespace Rex.Controllers
 
             await this.Store.RemoveIdeaAsync(collection ?? DefaultUserCollection(), id);
 
-            return idea.ToView<T>();
+            return Representer.ToView(idea);
         }
     }
 }

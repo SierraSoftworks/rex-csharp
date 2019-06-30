@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Rex.Views;
 
 namespace Rex.Models
 {
-    public class Idea : IModel<Idea>
+    public partial class Idea
     {
         public Guid CollectionId { get; set; }
 
@@ -17,13 +16,5 @@ namespace Rex.Models
         public bool Completed { get; set; }
 
         public HashSet<string> Tags { get; set; }
-
-        public T ToView<T>() where T : IModelView<Idea>, new()
-        {
-            var view = new T();
-            view.FromModel(this);
-
-            return view;
-        }
     }
 }
