@@ -14,14 +14,17 @@ namespace Rex.Controllers
     {
         private readonly ILogger<IdeaController<T>> logger;
 
-        public IdeaController(Stores.IIdeaStore store, IRepresenter<Idea, T> representer, ILogger<IdeaController<T>> logger)
+        public IdeaController(Stores.IIdeaStore store, Stores.IRoleAssignmentStore roleStore, IRepresenter<Idea, T> representer, ILogger<IdeaController<T>> logger)
         {
             Store = store;
+            RoleStore = roleStore;
             Representer = representer;
             this.logger = logger;
         }
 
         protected Stores.IIdeaStore Store { get; }
+
+        protected Stores.IRoleAssignmentStore RoleStore { get; }
 
         protected IRepresenter<Idea, T> Representer { get; }
 
@@ -31,6 +34,12 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<T>> Get(Guid id, Guid? collection)
         {
+            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            if (role?.Role == null)
+            {
+                return this.Forbid();
+            }
+
             var model = await this.Store.GetIdeaAsync(collection ?? this.User.GetOid(), id);
 
             if (model == null)
@@ -46,6 +55,12 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<T>> GetRandom(Guid? collection)
         {
+            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            if (role?.Role == null)
+            {
+                return this.Forbid();
+            }
+
             var model = await this.Store.GetRandomIdeaAsync(collection ?? this.User.GetOid());
 
             if (model == null)
@@ -75,6 +90,12 @@ namespace Rex.Controllers
                 model.CollectionId = this.User.GetOid();
             }
 
+            var role = await RoleStore.GetRoleAssignment(model.CollectionId, User.GetOid());
+            if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
+            {
+                return this.Forbid();
+            }
+
             model = await this.Store.StoreIdeaAsync(model);
 
             return Representer.ToView(model);
@@ -84,8 +105,16 @@ namespace Rex.Controllers
         [Route("api/[area]/ideas", Name = "GetIdeas.[area]")]
         [Route("api/[area]/collection/{collection:Guid}/ideas", Name = "GetIdeasByCollection.[area]")]
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
-        public virtual async Task<IEnumerable<T>> List(Guid? collection) =>
-            (await this.Store.GetIdeasAsync(collection ?? this.User.GetOid()).ToEnumerable()).Select(Representer.ToView);
+        public virtual async Task<ActionResult<IEnumerable<T>>> List(Guid? collection)
+        {
+            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            if (role?.Role == null)
+            {
+                return this.Forbid();
+            }
+
+            return (await this.Store.GetIdeasAsync(collection ?? this.User.GetOid()).ToEnumerable()).Select(Representer.ToView).ToActionResult();
+        }
 
 
         [HttpPost]
@@ -105,6 +134,12 @@ namespace Rex.Controllers
                 model.CollectionId = this.User.GetOid();
             }
 
+            var role = await RoleStore.GetRoleAssignment(model.CollectionId, User.GetOid());
+            if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
+            {
+                return this.Forbid();
+            }
+
             var addedIdea = await this.Store.StoreIdeaAsync(model);
 
             var area = this.RouteData.Values["area"];
@@ -122,6 +157,12 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasWrite, Roles = "Administrator")]
         public virtual async Task<ActionResult> Delete(Guid id, Guid? collection)
         {
+            var role = await RoleStore.GetRoleAssignment(collection ?? this.User.GetOid(), User.GetOid());
+            if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
+            {
+                return this.Forbid();
+            }
+
             if (!await this.Store.RemoveIdeaAsync(collection ?? this.User.GetOid(), id))
             {
                 return this.NotFound();
