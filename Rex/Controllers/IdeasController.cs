@@ -34,7 +34,7 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<T>> Get(Guid id, Guid? collection)
         {
-            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            var role = await GetUserRoleOrCreateDefault(collection);
             if (role?.Role == null)
             {
                 return this.Forbid();
@@ -55,7 +55,7 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<T>> GetRandom(Guid? collection)
         {
-            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            var role = await GetUserRoleOrCreateDefault(collection);
             if (role?.Role == null)
             {
                 return this.Forbid();
@@ -107,9 +107,10 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<IEnumerable<T>>> List(Guid? collection)
         {
-            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            var role = await GetUserRoleOrCreateDefault(collection);
             if (role?.Role == null)
             {
+
                 return this.Forbid();
             }
 
@@ -134,7 +135,7 @@ namespace Rex.Controllers
                 model.CollectionId = this.User.GetOid();
             }
 
-            var role = await RoleStore.GetRoleAssignment(model.CollectionId, User.GetOid());
+            var role = await GetUserRoleOrCreateDefault(collection);
             if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
             {
                 return this.Forbid();
@@ -157,7 +158,7 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasWrite, Roles = "Administrator")]
         public virtual async Task<ActionResult> Delete(Guid id, Guid? collection)
         {
-            var role = await RoleStore.GetRoleAssignment(collection ?? this.User.GetOid(), User.GetOid());
+            var role = await GetUserRoleOrCreateDefault(collection);
             if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
             {
                 return this.Forbid();
@@ -169,6 +170,22 @@ namespace Rex.Controllers
             }
 
             return this.NoContent();
+        }
+
+        protected async Task<RoleAssignment> GetUserRoleOrCreateDefault(Guid? collection)
+        {
+            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            if (role == null && (collection == null || collection == User.GetOid()))
+            {
+                role = await RoleStore.StoreRoleAssignmentAsync(new RoleAssignment
+                {
+                    CollectionId = collection ?? User.GetOid(),
+                    PrincipalId = User.GetOid(),
+                    Role = RoleAssignment.Owner
+                });
+            }
+
+            return role;
         }
     }
 }
