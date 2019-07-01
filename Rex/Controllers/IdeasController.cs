@@ -96,6 +96,8 @@ namespace Rex.Controllers
                 return this.Forbid();
             }
 
+            // TODO: We should create a default collection for the user if their own one doesn't exist and they're adding to it.
+
             model = await this.Store.StoreIdeaAsync(model);
 
             return Representer.ToView(model);

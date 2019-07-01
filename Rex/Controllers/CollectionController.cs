@@ -27,11 +27,13 @@ namespace Rex.Controllers
         [HttpGet]
         [Route("api/[area]/collections", Name = "GetCollections.[area]")]
         [Authorize(Scopes.CollectionsRead, Roles = "Administrator,User")]
+        // TODO: We should create a default collection for the user if their own one doesn't exist.
         public virtual async Task<IEnumerable<T>> List() => (await Store.GetCollection(User.GetOid()).ToEnumerable()).Select(Representer.ToView);
 
         [HttpGet]
         [Route("api/[area]/collection/{id:Guid}", Name = "GetCollection.[area]")]
         [Authorize(Scopes.CollectionsRead, Roles = "Administrator,User")]
+        // TODO: We should create a default collection for the user if they request their own one and it doesn't exist.
         public virtual async Task<T> Get(Guid id) => Representer.ToViewSafe(await this.Store.GetCollection(id, this.User.GetOid()));
 
         [HttpPost]
