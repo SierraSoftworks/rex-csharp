@@ -6,12 +6,12 @@ namespace Rex.Stores
 {
     public interface ICollectionStore
     {
-        Task<Models.Collection> GetCollection(Guid collectionId, Guid userId);
+        Task<Models.Collection> GetCollection(Guid userId, Guid collectionId);
 
-        IAsyncEnumerable<Models.Collection> GetCollection(Guid collectionId);
+        IAsyncEnumerable<Models.Collection> GetCollection(Guid userId);
 
         Task<Models.Collection> StoreCollectionAsync(Models.Collection collection);
 
-        Task<bool> RemoveCollectionAsync(Guid collectionId, Guid userId);
+        Task<bool> RemoveCollectionAsync(Guid userId, Guid collectionId);
     }
 }

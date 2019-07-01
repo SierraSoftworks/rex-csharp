@@ -52,17 +52,12 @@ namespace Rex
                     p.RequireAuthenticatedUser()
                         .RequireClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
 
-                o.AddPolicy("Ideas.Read", p =>
+                foreach (var name in Scopes.All())
+                    o.AddPolicy(name, p =>
                     p.RequireAuthenticatedUser()
                         .RequireClaim("http://schemas.microsoft.com/identity/claims/objectidentifier")
                         .RequireClaim("http://schemas.microsoft.com/identity/claims/scope")
-                        .RequireAssertion(s => s.User.FindAll(c => c.Type == "http://schemas.microsoft.com/identity/claims/scope" && c.Value.Split(' ').Contains("Ideas.Read")).Any()));
-
-                o.AddPolicy("Ideas.Write", p =>
-                    p.RequireAuthenticatedUser()
-                        .RequireClaim("http://schemas.microsoft.com/identity/claims/objectidentifier")
-                        .RequireClaim("http://schemas.microsoft.com/identity/claims/scope")
-                        .RequireAssertion(s => s.User.FindAll(c => c.Type == "http://schemas.microsoft.com/identity/claims/scope" && c.Value.Split(' ').Contains("Ideas.Write")).Any()));
+                        .RequireAssertion(s => s.User.FindAll(c => c.Type == "http://schemas.microsoft.com/identity/claims/scope" && c.Value.Split(' ').Contains(name)).Any()));
 
                 o.DefaultPolicy = o.GetPolicy("default");
             });
@@ -81,6 +76,8 @@ namespace Rex
             services.AddModelRepresenter<Models.RoleAssignment, Models.RoleAssignment.Version3, Models.RoleAssignment.Version3.Representer>();
 
             services.AddModelRepresenter<Models.Collection, Models.Collection.Version3, Models.Collection.Version3.Representer>();
+
+            services.AddModelRepresenter<Models.User, Models.User.Version3, Models.User.Version3.Representer>();
 
 
             switch (this.Configuration.GetValue<string>("Storage:Mode").ToLowerInvariant())

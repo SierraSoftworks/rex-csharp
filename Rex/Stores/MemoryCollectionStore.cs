@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Rex.Models;
@@ -12,12 +13,12 @@ namespace Rex.Stores
 
         private Dictionary<Guid, Dictionary<Guid, Models.Collection>> _state = new Dictionary<Guid, Dictionary<Guid, Models.Collection>>();
 
-        public async Task<Collection> GetCollection(Guid collectionId, Guid userId)
+        public async Task<Collection> GetCollection(Guid userId, Guid collectionId)
         {
             try
             {
                 this.lockSlim.EnterReadLock();
-                return this._state.GetValueOrDefault(collectionId)?.GetValueOrDefault(userId);
+                return this._state.GetValueOrDefault(userId)?.GetValueOrDefault(collectionId);
             }
             finally
             {
@@ -25,12 +26,12 @@ namespace Rex.Stores
             }
         }
 
-        public async IAsyncEnumerable<Collection> GetCollection(Guid collectionId)
+        public async IAsyncEnumerable<Collection> GetCollection(Guid userId)
         {
             try
             {
                 this.lockSlim.EnterReadLock();
-                foreach (var assignment in this._state.GetValueOrDefault(collectionId)?.Values)
+                foreach (var assignment in this._state.GetValueOrDefault(userId)?.Values.ToArray() ?? Array.Empty<Collection>())
                     yield return assignment;
             }
             finally
@@ -39,13 +40,13 @@ namespace Rex.Stores
             }
         }
 
-        public async Task<bool> RemoveCollectionAsync(Guid collectionId, Guid userId)
+        public async Task<bool> RemoveCollectionAsync(Guid userId, Guid collectionId)
         {
             try
             {
                 this.lockSlim.EnterReadLock();
 
-                return this._state.GetValueOrDefault(collectionId)?.Remove(userId) ?? false;
+                return this._state.GetValueOrDefault(userId)?.Remove(collectionId) ?? false;
             }
             finally
             {
@@ -58,8 +59,8 @@ namespace Rex.Stores
             try
             {
                 this.lockSlim.EnterWriteLock();
-                this._state[collection.CollectionId] = this._state.GetValueOrDefault(collection.CollectionId) ?? new Dictionary<Guid, Models.Collection>();
-                this._state[collection.CollectionId][collection.PrincipalId] = collection;
+                this._state[collection.PrincipalId] = this._state.GetValueOrDefault(collection.PrincipalId) ?? new Dictionary<Guid, Models.Collection>();
+                this._state[collection.PrincipalId][collection.CollectionId] = collection;
                 return collection;
             }
             finally

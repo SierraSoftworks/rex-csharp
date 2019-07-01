@@ -26,11 +26,11 @@ namespace Rex.Stores
         private readonly ILogger<TableStorageIdeaStore> logger;
         private readonly Random random;
 
-        public async Task<Collection> GetCollection(Guid collectionId, Guid userId)
+        public async Task<Collection> GetCollection(Guid userId, Guid collectionId)
         {
             await table.CreateIfNotExistsAsync();
 
-            var op = TableOperation.Retrieve<CollectionEntity>(collectionId.ToString("N"), userId.ToString("N"));
+            var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N"), collectionId.ToString("N"));
             var result = await table.ExecuteAsync(op);
 
             var assignment = result?.Result as CollectionEntity;
@@ -38,7 +38,7 @@ namespace Rex.Stores
             return assignment?.Model;
         }
 
-        public async IAsyncEnumerable<Collection> GetCollection(Guid collectionId)
+        public async IAsyncEnumerable<Collection> GetCollection(Guid userId)
         {
             await table.CreateIfNotExistsAsync();
 
@@ -46,7 +46,7 @@ namespace Rex.Stores
                 TableQuery.GenerateFilterCondition(
                     "PartitionKey",
                     QueryComparisons.Equal,
-                    collectionId.ToString("N")));
+                    userId.ToString("N")));
 
             var count = 0;
             TableContinuationToken continuationToken = null;
@@ -59,14 +59,14 @@ namespace Rex.Stores
                     yield return idea;
             } while (continuationToken != null);
 
-            this.logger.LogDebug("Fetched {Count} ideas for collection {CollectionID}", count, collectionId);
+            this.logger.LogDebug("Fetched {Count} ideas for collection {CollectionID}", count, userId);
         }
 
-        public async Task<bool> RemoveCollectionAsync(Guid collectionId, Guid userId)
+        public async Task<bool> RemoveCollectionAsync(Guid userId, Guid collectionId)
         {
             await table.CreateIfNotExistsAsync();
 
-            var op = TableOperation.Retrieve<CollectionEntity>(collectionId.ToString("N"), userId.ToString("N"));
+            var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N"), collectionId.ToString("N"));
             var result = await table.ExecuteAsync(op);
 
             var assignment = result?.Result as CollectionEntity;
@@ -102,8 +102,8 @@ namespace Rex.Stores
 
             public CollectionEntity(Models.Collection collection)
             {
-                this.PartitionKey = (collection.CollectionId == Guid.Empty ? Guid.NewGuid() : collection.CollectionId).ToString("N");
-                this.RowKey = (collection.PrincipalId == Guid.Empty ? Guid.NewGuid() : collection.PrincipalId).ToString("N");
+                this.PartitionKey = (collection.PrincipalId == Guid.Empty ? Guid.NewGuid() : collection.PrincipalId).ToString("N");
+                this.RowKey = (collection.CollectionId == Guid.Empty ? Guid.NewGuid() : collection.CollectionId).ToString("N");
                 this.Name = collection.Name;
             }
 
@@ -111,8 +111,8 @@ namespace Rex.Stores
 
             public Models.Collection Model => new Models.Collection()
             {
-                CollectionId = Guid.ParseExact(this.PartitionKey, "N"),
-                PrincipalId = Guid.ParseExact(this.RowKey, "N"),
+                PrincipalId = Guid.ParseExact(this.PartitionKey, "N"),
+                CollectionId = Guid.ParseExact(this.RowKey, "N"),
                 Name = this.Name
             };
         }

@@ -23,8 +23,8 @@ namespace Rex.Models
                 {
                     return new Collection
                     {
-                        CollectionId = Guid.ParseExact(view.ID, "N"),
-                        PrincipalId = Guid.ParseExact(view.UserID, "N"),
+                        CollectionId = view.ID != null ? Guid.ParseExact(view.ID, "N") : Guid.NewGuid(),
+                        PrincipalId = view.UserID != null ? Guid.ParseExact(view.UserID, "N") : Guid.Empty,
                         Name = view.Name,
                     };
                 }

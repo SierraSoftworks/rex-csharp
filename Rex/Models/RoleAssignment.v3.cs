@@ -23,8 +23,8 @@ namespace Rex.Models
                 {
                     return new RoleAssignment
                     {
-                        PrincipalId = Guid.ParseExact(view.PrincipalId, "N"),
-                        CollectionId = Guid.ParseExact(view.CollectionId, "N"),
+                        PrincipalId = view.PrincipalId != null ? Guid.ParseExact(view.PrincipalId, "N") : Guid.Empty,
+                        CollectionId = view.CollectionId != null ? Guid.ParseExact(view.CollectionId, "N") : Guid.Empty,
                         Role = view.Role,
                     };
                 }

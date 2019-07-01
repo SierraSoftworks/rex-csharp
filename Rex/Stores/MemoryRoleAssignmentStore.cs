@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Rex.Models;
@@ -12,12 +13,12 @@ namespace Rex.Stores
 
         private Dictionary<Guid, Dictionary<Guid, Models.RoleAssignment>> _state = new Dictionary<Guid, Dictionary<Guid, Models.RoleAssignment>>();
 
-        public async Task<RoleAssignment> GetRoleAssignment(Guid userId, Guid collectionId)
+        public async Task<RoleAssignment> GetRoleAssignment(Guid collectionId, Guid userId)
         {
             try
             {
                 this.lockSlim.EnterReadLock();
-                return this._state.GetValueOrDefault(userId)?.GetValueOrDefault(collectionId);
+                return this._state.GetValueOrDefault(collectionId)?.GetValueOrDefault(userId);
             }
             finally
             {
@@ -25,12 +26,12 @@ namespace Rex.Stores
             }
         }
 
-        public async IAsyncEnumerable<RoleAssignment> GetRoleAssignments(Guid userId)
+        public async IAsyncEnumerable<RoleAssignment> GetRoleAssignments(Guid collectionId)
         {
             try
             {
                 this.lockSlim.EnterReadLock();
-                foreach (var assignment in this._state.GetValueOrDefault(userId)?.Values)
+                foreach (var assignment in this._state.GetValueOrDefault(collectionId)?.Values?.ToArray() ?? Array.Empty<RoleAssignment>())
                     yield return assignment;
             }
             finally
@@ -39,13 +40,13 @@ namespace Rex.Stores
             }
         }
 
-        public async Task<bool> RemoveRoleAssignmentAsync(Guid userId, Guid collectionId)
+        public async Task<bool> RemoveRoleAssignmentAsync(Guid collectionId, Guid userId)
         {
             try
             {
                 this.lockSlim.EnterReadLock();
 
-                return this._state.GetValueOrDefault(userId)?.Remove(collectionId) ?? false;
+                return this._state.GetValueOrDefault(collectionId)?.Remove(userId) ?? false;
             }
             finally
             {
@@ -58,8 +59,8 @@ namespace Rex.Stores
             try
             {
                 this.lockSlim.EnterWriteLock();
-                this._state[assignment.PrincipalId] = this._state.GetValueOrDefault(assignment.PrincipalId) ?? new Dictionary<Guid, Models.RoleAssignment>();
-                this._state[assignment.PrincipalId][assignment.CollectionId] = assignment;
+                this._state[assignment.CollectionId] = this._state.GetValueOrDefault(assignment.CollectionId) ?? new Dictionary<Guid, Models.RoleAssignment>();
+                this._state[assignment.CollectionId][assignment.PrincipalId] = assignment;
                 return assignment;
             }
             finally

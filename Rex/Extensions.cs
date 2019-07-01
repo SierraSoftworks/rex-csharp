@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -92,6 +93,18 @@ namespace Rex
         public static ActionResult<T> ToActionResult<T>(this T result)
         {
             return new ActionResult<T>(result);
+        }
+
+        public static Guid GetOid(this ClaimsPrincipal user)
+        {
+            return Guid.ParseExact(user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value ?? Guid.NewGuid().ToString("D"), "D");
+        }
+
+        public static TView ToViewSafe<TModel, TView>(this Models.IRepresenter<TModel, TView> representer, TModel model)
+            where TView : Models.IView<TModel>
+        {
+            if (model == null) return default(TView);
+            return representer.ToView(model);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Rex.Models
             public string Description { get; set; }
 
             [XmlAttribute("Completed")]
-            public bool Completed { get; set; }
+            public bool? Completed { get; set; }
 
             [XmlArray("Tags")]
             [XmlArrayItem("Tag")]
@@ -34,12 +34,12 @@ namespace Rex.Models
                 {
                     return new Idea
                     {
-                        CollectionId = view.Collection != null ? Guid.Parse(view.Collection) : Guid.NewGuid(),
+                        CollectionId = view.Collection != null ? Guid.Parse(view.Collection) : Guid.Empty,
                         Id = view.Id != null ? Guid.Parse(view.Id) : Guid.NewGuid(),
                         Name = view.Name,
                         Description = view.Description,
-                        Completed = view.Completed,
-                        Tags = new System.Collections.Generic.HashSet<string>(view.Tags),
+                        Completed = view.Completed ?? false,
+                        Tags = new System.Collections.Generic.HashSet<string>(view.Tags ?? Array.Empty<string>()),
                     };
                 }
 

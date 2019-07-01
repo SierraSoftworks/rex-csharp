@@ -26,11 +26,11 @@ namespace Rex.Stores
         private readonly ILogger<TableStorageIdeaStore> logger;
         private readonly Random random;
 
-        public async Task<RoleAssignment> GetRoleAssignment(Guid userId, Guid collectionId)
+        public async Task<RoleAssignment> GetRoleAssignment(Guid collectionId, Guid userId)
         {
             await table.CreateIfNotExistsAsync();
 
-            var op = TableOperation.Retrieve<RoleAssignmentEntity>(userId.ToString("N"), collectionId.ToString("N"));
+            var op = TableOperation.Retrieve<RoleAssignmentEntity>(collectionId.ToString("N"), userId.ToString("N"));
             var result = await table.ExecuteAsync(op);
 
             var assignment = result?.Result as RoleAssignmentEntity;
@@ -38,7 +38,7 @@ namespace Rex.Stores
             return assignment?.Model;
         }
 
-        public async IAsyncEnumerable<RoleAssignment> GetRoleAssignments(Guid userId)
+        public async IAsyncEnumerable<RoleAssignment> GetRoleAssignments(Guid collectionId)
         {
             await table.CreateIfNotExistsAsync();
 
@@ -46,7 +46,7 @@ namespace Rex.Stores
                 TableQuery.GenerateFilterCondition(
                     "PartitionKey",
                     QueryComparisons.Equal,
-                    userId.ToString("N")));
+                    collectionId.ToString("N")));
 
             var count = 0;
             TableContinuationToken continuationToken = null;
@@ -59,14 +59,14 @@ namespace Rex.Stores
                     yield return idea;
             } while (continuationToken != null);
 
-            this.logger.LogDebug("Fetched {Count} ideas for user {UserId}", count, userId);
+            this.logger.LogDebug("Fetched {Count} ideas for user {UserId}", count, collectionId);
         }
 
-        public async Task<bool> RemoveRoleAssignmentAsync(Guid userId, Guid collectionId)
+        public async Task<bool> RemoveRoleAssignmentAsync(Guid collectionId, Guid userId)
         {
             await table.CreateIfNotExistsAsync();
 
-            var op = TableOperation.Retrieve<RoleAssignmentEntity>(userId.ToString("N"), collectionId.ToString("N"));
+            var op = TableOperation.Retrieve<RoleAssignmentEntity>(collectionId.ToString("N"), userId.ToString("N"));
             var result = await table.ExecuteAsync(op);
 
             var assignment = result?.Result as RoleAssignmentEntity;
@@ -102,8 +102,8 @@ namespace Rex.Stores
 
             public RoleAssignmentEntity(Models.RoleAssignment assignment)
             {
-                this.PartitionKey = (assignment.PrincipalId == Guid.Empty ? Guid.NewGuid() : assignment.PrincipalId).ToString("N");
-                this.RowKey = (assignment.CollectionId == Guid.Empty ? Guid.NewGuid() : assignment.CollectionId).ToString("N");
+                this.PartitionKey = (assignment.CollectionId == Guid.Empty ? Guid.NewGuid() : assignment.CollectionId).ToString("N");
+                this.RowKey = (assignment.PrincipalId == Guid.Empty ? Guid.NewGuid() : assignment.PrincipalId).ToString("N");
                 this.Role = assignment.Role;
             }
 
@@ -111,8 +111,8 @@ namespace Rex.Stores
 
             public Models.RoleAssignment Model => new Models.RoleAssignment()
             {
-                PrincipalId = Guid.ParseExact(this.PartitionKey, "N"),
-                CollectionId = Guid.ParseExact(this.RowKey, "N"),
+                CollectionId = Guid.ParseExact(this.PartitionKey, "N"),
+                PrincipalId = Guid.ParseExact(this.RowKey, "N"),
                 Role = this.Role
             };
         }
