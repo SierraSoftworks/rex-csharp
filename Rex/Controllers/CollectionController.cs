@@ -27,14 +27,23 @@ namespace Rex.Controllers
         [HttpGet]
         [Route("api/[area]/collections", Name = "GetCollections.[area]")]
         [Authorize(Scopes.CollectionsRead, Roles = "Administrator,User")]
-        // TODO: We should create a default collection for the user if their own one doesn't exist.
-        public virtual async Task<IEnumerable<T>> List() => (await Store.GetCollection(User.GetOid()).ToEnumerable()).Select(Representer.ToView);
+        public virtual async Task<IEnumerable<T>> List()
+        {
+            await GetUserCollectionOrCreateAsync();
+
+            return (await Store.GetCollectionsAsync(User.GetOid()).ToEnumerable()).Select(Representer.ToView);
+        }
 
         [HttpGet]
+        [Route("api/[area]/collection", Name = "GetCollectionForUser.[area]")]
         [Route("api/[area]/collection/{id:Guid}", Name = "GetCollection.[area]")]
         [Authorize(Scopes.CollectionsRead, Roles = "Administrator,User")]
-        // TODO: We should create a default collection for the user if they request their own one and it doesn't exist.
-        public virtual async Task<T> Get(Guid id) => Representer.ToViewSafe(await this.Store.GetCollection(id, this.User.GetOid()));
+        public virtual async Task<T> Get(Guid? id)
+        {
+            if ((id ?? User.GetOid()) == User.GetOid())
+                return await GetUserCollectionOrCreateAsync();
+            return Representer.ToViewSafe(await this.Store.GetCollectionAsync(User.GetOid(), id ?? User.GetOid()));
+        }
 
         [HttpPost]
         [Route("api/[area]/collections", Name = "CreateCollection.[area]")]
@@ -49,6 +58,11 @@ namespace Rex.Controllers
             }
 
             model.PrincipalId = this.User.GetOid();
+
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                return this.BadRequest();
+            }
 
             var added = await Store.StoreCollectionAsync(model);
 
@@ -88,6 +102,31 @@ namespace Rex.Controllers
             await this.RoleStore.RemoveRoleAssignmentAsync(this.User.GetOid(), id);
 
             return this.NoContent();
+        }
+
+        private async Task<T> GetUserCollectionOrCreateAsync()
+        {
+            var userOid = User.GetOid();
+
+            var collection = await Store.GetCollectionAsync(userOid, userOid);
+            if (collection == null)
+            {
+                collection = await Store.StoreCollectionAsync(new Collection
+                {
+                    CollectionId = userOid,
+                    PrincipalId = userOid,
+                    Name = "Your Ideas",
+                });
+
+                await RoleStore.StoreRoleAssignmentAsync(new RoleAssignment
+                {
+                    CollectionId = userOid,
+                    PrincipalId = userOid,
+                    Role = RoleAssignment.Owner,
+                });
+            }
+
+            return Representer.ToView(collection);
         }
     }
 }

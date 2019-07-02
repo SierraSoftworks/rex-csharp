@@ -26,7 +26,7 @@ namespace Rex.Stores
         private readonly ILogger<TableStorageIdeaStore> logger;
         private readonly Random random;
 
-        public async Task<Collection> GetCollection(Guid userId, Guid collectionId)
+        public async Task<Collection> GetCollectionAsync(Guid userId, Guid collectionId)
         {
             await table.CreateIfNotExistsAsync();
 
@@ -38,7 +38,7 @@ namespace Rex.Stores
             return assignment?.Model;
         }
 
-        public async IAsyncEnumerable<Collection> GetCollection(Guid userId)
+        public async IAsyncEnumerable<Collection> GetCollectionsAsync(Guid userId)
         {
             await table.CreateIfNotExistsAsync();
 

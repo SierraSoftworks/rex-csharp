@@ -13,7 +13,7 @@ namespace Rex.Stores
 
         private Dictionary<Guid, Dictionary<Guid, Models.Collection>> _state = new Dictionary<Guid, Dictionary<Guid, Models.Collection>>();
 
-        public async Task<Collection> GetCollection(Guid userId, Guid collectionId)
+        public async Task<Collection> GetCollectionAsync(Guid userId, Guid collectionId)
         {
             try
             {
@@ -26,7 +26,7 @@ namespace Rex.Stores
             }
         }
 
-        public async IAsyncEnumerable<Collection> GetCollection(Guid userId)
+        public async IAsyncEnumerable<Collection> GetCollectionsAsync(Guid userId)
         {
             try
             {
