@@ -11,6 +11,12 @@ namespace Rex.Models
             [XmlAttribute("id")]
             public string ID { get; set; }
 
+            [XmlAttribute("email-hash")]
+            public string EmailHash { get; set; }
+
+            [XmlElement("first-name")]
+            public string FirstName { get; set; }
+
             public class Representer : IRepresenter<User, Version3>
             {
                 public User ToModel(Version3 view)
@@ -18,6 +24,8 @@ namespace Rex.Models
                     return new User
                     {
                         PrincipalId = Guid.ParseExact(view.ID, "N"),
+                        EmailHash = view.EmailHash,
+                        FirstName = view.FirstName,
                     };
                 }
 
@@ -26,6 +34,8 @@ namespace Rex.Models
                     return new Version3
                     {
                         ID = model.PrincipalId.ToString("N"),
+                        EmailHash = model.EmailHash,
+                        FirstName = model.FirstName,
                     };
                 }
             }
