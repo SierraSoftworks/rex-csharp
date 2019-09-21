@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Rex.Models;
-using Microsoft.WindowsAzure.Storage.Table;
 using System.Linq;
+using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Rex.Stores
