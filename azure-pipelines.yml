@@ -2,7 +2,7 @@ pool:
   name: Hosted Windows 2019 with VS2019
 
 variables:
-  "dotnetcore.version": "3.0.100-rc1-014190"
+  "dotnetcore.version": "3.0.100"
 
 steps:
   - task: gittools.gitversion.gitversion-task.GitVersion@4
