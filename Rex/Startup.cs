@@ -66,29 +66,17 @@ namespace Rex
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddModelRepresenter<Models.Health, Models.Health.Version1, Models.Health.Version1.Representer>()
-                    .AddModelRepresenter<Models.Health, Models.Health.Version2, Models.Health.Version2.Representer>();
+            services.AddModelRepresentersFromAssembly(typeof(Models.User).Assembly);
 
-            services.AddModelRepresenter<Models.Idea, Models.Idea.Version1, Models.Idea.Version1.Representer>()
-                    .AddModelRepresenter<Models.Idea, Models.Idea.Version2, Models.Idea.Version2.Representer>()
-                    .AddModelRepresenter<Models.Idea, Models.Idea.Version3, Models.Idea.Version3.Representer>();
-
-            services.AddModelRepresenter<Models.RoleAssignment, Models.RoleAssignment.Version3, Models.RoleAssignment.Version3.Representer>();
-
-            services.AddModelRepresenter<Models.Collection, Models.Collection.Version3, Models.Collection.Version3.Representer>();
-
-            services.AddModelRepresenter<Models.User, Models.User.Version3, Models.User.Version3.Representer>();
-
-
-            switch (this.Configuration.GetValue<string>("Storage:Mode").ToLowerInvariant())
+            switch (this.Configuration.GetValue<string>("Storage:Mode").ToUpperInvariant())
             {
-                case "tablestorage":
+                case "TABLESTORAGE":
                     services.AddSingleton<Stores.IHealthStore, Stores.MemoryHealthStore>()
                             .AddSingleton<Stores.IIdeaStore, Stores.TableStorageIdeaStore>()
                             .AddSingleton<Stores.ICollectionStore, Stores.TableStorageCollectionStore>()
                             .AddSingleton<Stores.IRoleAssignmentStore, Stores.TableStorageRoleAssignmentStore>();
                     break;
-                case "memory":
+                case "MEMORY":
                 default:
                     services.AddSingleton<Stores.IHealthStore, Stores.MemoryHealthStore>()
                             .AddSingleton<Stores.IIdeaStore, Stores.MemoryIdeaStore>()

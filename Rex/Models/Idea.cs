@@ -15,6 +15,7 @@ namespace Rex.Models
 
         public bool Completed { get; set; }
 
-        public HashSet<string> Tags { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "This is used by the IRepresenter implementation")]
+        public HashSet<string> Tags { get; set; } = new HashSet<string>();
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Rex.Models;
 using Rex.Stores;
+using SierraLib.API.Views;
 
 namespace Rex.Controllers
 {

@@ -6,55 +6,59 @@ using System.Linq;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SierraLib.API.Views;
+using System.Globalization;
 
 namespace Rex.Stores
 {
     public class TableStorageIdeaStore : IIdeaStore
     {
-        public TableStorageIdeaStore(IConfiguration config, ILogger<TableStorageIdeaStore> logger)
+        public TableStorageIdeaStore(IConfiguration config, ILogger<TableStorageIdeaStore> logger, IRepresenter<Idea, IdeaEntity> representer)
         {
             var connectionString = config.GetConnectionString("StorageAccount");
             var storageAccount = CloudStorageAccount.Parse(connectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             this.table = tableClient.GetTableReference("ideas");
             this.logger = logger;
+            this.representer = representer;
             this.random = new Random();
         }
 
         private readonly CloudTable table;
         private readonly ILogger<TableStorageIdeaStore> logger;
+        private readonly IRepresenter<Idea, IdeaEntity> representer;
         private readonly Random random;
 
         public async Task<Idea> GetIdeaAsync(Guid collection, Guid id)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-            var op = TableOperation.Retrieve<IdeaEntity>(collection.ToString("N"), id.ToString("N"));
-            var result = await table.ExecuteAsync(op);
+            var op = TableOperation.Retrieve<IdeaEntity>(collection.ToString("N", CultureInfo.InvariantCulture), id.ToString("N", CultureInfo.InvariantCulture));
+            var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var idea = result?.Result as IdeaEntity;
 
-            return idea?.Model;
+            return this.representer.ToModelOrDefault(idea);
         }
 
         public async IAsyncEnumerable<Idea> GetIdeasAsync(Guid collection)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
             var query = new TableQuery<IdeaEntity>().Where(
                 TableQuery.GenerateFilterCondition(
                     "PartitionKey",
                     QueryComparisons.Equal,
-                    collection.ToString("N")));
+                    collection.ToString("N", CultureInfo.InvariantCulture)));
 
             var count = 0;
             TableContinuationToken continuationToken = null;
             do
             {
-                var result = await table.ExecuteQuerySegmentedAsync(query, continuationToken);
+                var result = await table.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = result.ContinuationToken;
                 count += result.Results.Count;
-                foreach (var idea in result.Results.Select(i => i.Model))
+                foreach (var idea in result.Results.Select(i => this.representer.ToModel(i)))
                     yield return idea;
             } while (continuationToken != null);
 
@@ -68,20 +72,20 @@ namespace Rex.Stores
 
         public async Task<Idea> GetRandomIdeaAsync(Guid collection)
         {
-            return await GetIdeasAsync(collection).RandomOrDefaultWith(null, this.random);
+            return await GetIdeasAsync(collection).RandomOrDefaultWith(null, random).ConfigureAwait(false);
         }
 
         public async Task<Idea> GetRandomIdeaAsync(Guid collection, Func<Idea, bool> predicate)
         {
-            return await GetIdeasAsync(collection).Where(predicate).RandomOrDefaultWith(null, this.random);
+            return await GetIdeasAsync(collection).Where(predicate).RandomOrDefaultWith(null, random).ConfigureAwait(false);
         }
 
         public async Task<bool> RemoveIdeaAsync(Guid collection, Guid id)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-            var op = TableOperation.Retrieve<IdeaEntity>(collection.ToString("N"), id.ToString("N"));
-            var result = await table.ExecuteAsync(op);
+            var op = TableOperation.Retrieve<IdeaEntity>(collection.ToString("N", CultureInfo.InvariantCulture), id.ToString("N", CultureInfo.InvariantCulture));
+            var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var idea = result?.Result as IdeaEntity;
             if (idea == null)
@@ -90,38 +94,29 @@ namespace Rex.Stores
             }
 
             op = TableOperation.Delete(idea);
-            result = await table.ExecuteAsync(op);
+            result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             return true;
         }
 
         public async Task<Idea> StoreIdeaAsync(Idea idea)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-            var op = TableOperation.InsertOrReplace(new IdeaEntity(idea));
-            var result = await table.ExecuteAsync(op);
+            var op = TableOperation.InsertOrReplace(this.representer.ToView(idea));
+            var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var ideaResult = result?.Result as IdeaEntity;
 
-            return ideaResult?.Model;
+            return this.representer.ToModelOrDefault(ideaResult);
         }
 
-        private class IdeaEntity : TableEntity
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "This is required to represent the model.")]
+        public class IdeaEntity : TableEntity, IView<Idea>
         {
             public IdeaEntity()
             {
 
-            }
-
-            public IdeaEntity(Models.Idea idea)
-            {
-                this.PartitionKey = (idea.CollectionId == Guid.Empty ? Guid.NewGuid() : idea.CollectionId).ToString("N");
-                this.RowKey = (idea.Id == Guid.Empty ? Guid.NewGuid() : idea.Id).ToString("N");
-                this.Name = idea.Name;
-                this.Description = idea.Description;
-                this.Completed = idea.Completed;
-                this.Tags = string.Join(',', idea.Tags);
             }
 
             public string Name { get; set; }
@@ -132,15 +127,45 @@ namespace Rex.Stores
 
             public string Tags { get; set; }
 
-            public Models.Idea Model => new Idea()
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "This is required to represent the view.")]
+            public class Representer : IRepresenter<Idea, IdeaEntity>
             {
-                CollectionId = Guid.ParseExact(this.PartitionKey, "N"),
-                Id = Guid.ParseExact(this.RowKey, "N"),
-                Name = this.Name,
-                Description = this.Description,
-                Completed = this.Completed,
-                Tags = this.Tags.Split(",").Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToHashSet()
-            };
+                public Idea ToModel(IdeaEntity view)
+                {
+                    if (view is null)
+                    {
+                        throw new ArgumentNullException(nameof(view));
+                    }
+
+                    return new Idea
+                    {
+                        CollectionId = Guid.ParseExact(view.PartitionKey, "N"),
+                        Id = Guid.ParseExact(view.RowKey, "N"),
+                        Name = view.Name,
+                        Description = view.Description,
+                        Completed = view.Completed,
+                        Tags = view.Tags.Split(",").Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToHashSet()
+                    };
+                }
+
+                public IdeaEntity ToView(Idea model)
+                {
+                    if (model is null)
+                    {
+                        throw new ArgumentNullException(nameof(model));
+                    }
+
+                    return new IdeaEntity
+                    {
+                        PartitionKey = (model.CollectionId == Guid.Empty ? Guid.NewGuid() : model.CollectionId).ToString("N", CultureInfo.InvariantCulture),
+                        RowKey = (model.Id == Guid.Empty ? Guid.NewGuid() : model.Id).ToString("N", CultureInfo.InvariantCulture),
+                        Name = model.Name,
+                        Description = model.Description,
+                        Completed = model.Completed,
+                        Tags = string.Join(',', model.Tags),
+                };
+                }
+            }
         }
     }
 }

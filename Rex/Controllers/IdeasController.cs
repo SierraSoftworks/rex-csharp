@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Rex.Models;
+using SierraLib.API.Views;
 
 namespace Rex.Controllers
 {
@@ -32,15 +34,15 @@ namespace Rex.Controllers
         [Route("api/[area]/idea/{id:Guid}", Name = "GetIdea.[area]")]
         [Route("api/[area]/collection/{collection:Guid}/idea/{id:Guid}", Name = "GetIdeaByCollection.[area]")]
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
-        public virtual async Task<ActionResult<T>> Get(Guid id, Guid? collection)
+        public virtual async Task<ActionResult<T>> GetIdea(Guid id, Guid? collection)
         {
-            var role = await GetUserRoleOrCreateDefault(collection);
+            var role = await GetUserRoleOrCreateDefault(collection).ConfigureAwait(false);
             if (role?.Role == null)
             {
                 return this.Forbid();
             }
 
-            var model = await this.Store.GetIdeaAsync(collection ?? this.User.GetOid(), id);
+            var model = await Store.GetIdeaAsync(collection ?? User.GetOid(), id).ConfigureAwait(false);
 
             if (model == null)
                 return NotFound();
@@ -55,13 +57,13 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<T>> GetRandom(Guid? collection)
         {
-            var role = await GetUserRoleOrCreateDefault(collection);
+            var role = await GetUserRoleOrCreateDefault(collection).ConfigureAwait(false);
             if (role?.Role == null)
             {
                 return this.Forbid();
             }
 
-            var model = await this.Store.GetRandomIdeaAsync(collection ?? this.User.GetOid());
+            var model = await Store.GetRandomIdeaAsync(collection ?? User.GetOid()).ConfigureAwait(false);
 
             if (model == null)
                 return NotFound();
@@ -90,13 +92,13 @@ namespace Rex.Controllers
                 model.CollectionId = this.User.GetOid();
             }
 
-            var role = await RoleStore.GetRoleAssignment(model.CollectionId, User.GetOid());
+            var role = await RoleStore.GetRoleAssignment(model.CollectionId, User.GetOid()).ConfigureAwait(false);
             if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
             {
                 return this.Forbid();
             }
 
-            model = await this.Store.StoreIdeaAsync(model);
+            model = await Store.StoreIdeaAsync(model).ConfigureAwait(false);
 
             return Representer.ToView(model);
         }
@@ -107,14 +109,14 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasRead, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<IEnumerable<T>>> List(Guid? collection)
         {
-            var role = await GetUserRoleOrCreateDefault(collection);
+            var role = await GetUserRoleOrCreateDefault(collection).ConfigureAwait(false);
             if (role?.Role == null)
             {
 
                 return this.Forbid();
             }
 
-            return (await this.Store.GetIdeasAsync(collection ?? this.User.GetOid()).ToEnumerable()).Select(Representer.ToView).ToActionResult();
+            return (await Store.GetIdeasAsync(collection ?? User.GetOid()).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView).ToActionResult();
         }
 
 
@@ -135,20 +137,20 @@ namespace Rex.Controllers
                 model.CollectionId = this.User.GetOid();
             }
 
-            var role = await GetUserRoleOrCreateDefault(collection);
+            var role = await GetUserRoleOrCreateDefault(collection).ConfigureAwait(false);
             if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
             {
                 return this.Forbid();
             }
 
-            var addedIdea = await this.Store.StoreIdeaAsync(model);
+            var addedIdea = await Store.StoreIdeaAsync(model).ConfigureAwait(false);
 
             var area = this.RouteData.Values["area"];
 
             if (model.CollectionId == this.User.GetOid())
-                return this.CreatedAtRoute($"GetIdea.{area}", new { id = addedIdea.Id.ToString("N") }, Representer.ToView(addedIdea));
+                return this.CreatedAtRoute($"GetIdea.{area}", new { id = addedIdea.Id.ToString("N", CultureInfo.InvariantCulture) }, Representer.ToView(addedIdea));
             else
-                return this.CreatedAtRoute($"GetIdeaByCollection.{area}", new { collection = addedIdea.CollectionId.ToString("N"), id = addedIdea.Id.ToString("N") }, Representer.ToView(addedIdea));
+                return this.CreatedAtRoute($"GetIdeaByCollection.{area}", new { collection = addedIdea.CollectionId.ToString("N", CultureInfo.InvariantCulture), id = addedIdea.Id.ToString("N", CultureInfo.InvariantCulture) }, Representer.ToView(addedIdea));
 
         }
 
@@ -158,13 +160,13 @@ namespace Rex.Controllers
         [Authorize(Scopes.IdeasWrite, Roles = "Administrator")]
         public virtual async Task<ActionResult> Delete(Guid id, Guid? collection)
         {
-            var role = await GetUserRoleOrCreateDefault(collection);
+            var role = await GetUserRoleOrCreateDefault(collection).ConfigureAwait(false);
             if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
             {
                 return this.Forbid();
             }
 
-            if (!await this.Store.RemoveIdeaAsync(collection ?? this.User.GetOid(), id))
+            if (!await Store.RemoveIdeaAsync(collection ?? User.GetOid(), id).ConfigureAwait(false))
             {
                 return this.NotFound();
             }
@@ -174,7 +176,7 @@ namespace Rex.Controllers
 
         protected async Task<RoleAssignment> GetUserRoleOrCreateDefault(Guid? collection)
         {
-            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid());
+            var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid()).ConfigureAwait(false);
             if (role == null && (collection == null || collection == User.GetOid()))
             {
                 role = await RoleStore.StoreRoleAssignmentAsync(new RoleAssignment
@@ -182,7 +184,7 @@ namespace Rex.Controllers
                     CollectionId = collection ?? User.GetOid(),
                     PrincipalId = User.GetOid(),
                     Role = RoleAssignment.Owner
-                });
+                }).ConfigureAwait(false);
             }
 
             return role;

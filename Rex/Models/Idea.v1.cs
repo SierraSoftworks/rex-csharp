@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.Xml.Serialization;
+using SierraLib.API.Views;
 
 namespace Rex.Models
 {
@@ -22,6 +24,11 @@ namespace Rex.Models
             {
                 public Idea ToModel(Version1 view)
                 {
+                    if (view is null)
+                    {
+                        throw new ArgumentNullException(nameof(view));
+                    }
+
                     return new Idea
                     {
                         CollectionId = Guid.Empty,
@@ -35,9 +42,14 @@ namespace Rex.Models
 
                 public Version1 ToView(Idea model)
                 {
+                    if (model is null)
+                    {
+                        throw new ArgumentNullException(nameof(model));
+                    }
+
                     return new Version1
                     {
-                        Id = model.Id.ToString("N"),
+                        Id = model.Id.ToString("N", CultureInfo.InvariantCulture),
                         Name = model.Name,
                         Description = model.Description,
                     };

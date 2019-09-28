@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.Xml.Serialization;
+using SierraLib.API.Views;
 
 namespace Rex.Models
 {
@@ -21,6 +23,11 @@ namespace Rex.Models
             {
                 public User ToModel(Version3 view)
                 {
+                    if (view is null)
+                    {
+                        throw new ArgumentNullException(nameof(view));
+                    }
+
                     return new User
                     {
                         PrincipalId = Guid.ParseExact(view.ID, "N"),
@@ -31,9 +38,14 @@ namespace Rex.Models
 
                 public Version3 ToView(User model)
                 {
+                    if (model is null)
+                    {
+                        throw new ArgumentNullException(nameof(model));
+                    }
+
                     return new Version3
                     {
-                        ID = model.PrincipalId.ToString("N"),
+                        ID = model.PrincipalId.ToString("N", CultureInfo.InvariantCulture),
                         EmailHash = model.EmailHash,
                         FirstName = model.FirstName,
                     };

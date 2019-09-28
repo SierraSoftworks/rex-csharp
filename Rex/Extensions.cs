@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using SierraLib.API.Views;
 
 namespace Rex
 {
@@ -27,6 +29,11 @@ namespace Rex
 
         public static T RandomOrDefaultWith<T>(this IEnumerable<T> e, T defaultValue, Random rng)
         {
+            if (rng is null)
+            {
+                throw new ArgumentNullException(nameof(rng));
+            }
+
             var current = default(T);
             var count = 0;
 
@@ -40,12 +47,12 @@ namespace Rex
             return current;
         }
 
-        public static async Task<T> Random<T>(this IAsyncEnumerable<T> e) => await e.RandomWith(new Random());
+        public static async Task<T> Random<T>(this IAsyncEnumerable<T> e) => await e.RandomWith(new Random()).ConfigureAwait(false);
 
         public static async Task<T> RandomWith<T>(this IAsyncEnumerable<T> e, Random rng)
         {
             var defaultValue = default(T);
-            var result = await e.RandomOrDefaultWith(defaultValue, rng);
+            var result = await e.RandomOrDefaultWith(defaultValue, rng).ConfigureAwait(false);
             if (object.ReferenceEquals(result, defaultValue))
                 throw new InvalidOperationException("Sequence was empty");
             return result;
@@ -53,10 +60,15 @@ namespace Rex
 
         public static async Task<T> RandomOrDefault<T>(this IAsyncEnumerable<T> e, T defaultValue)
         {
-            return await e.RandomOrDefaultWith(defaultValue, new Random());
+            return await e.RandomOrDefaultWith(defaultValue, new Random()).ConfigureAwait(false);
         }
         public static async Task<T> RandomOrDefaultWith<T>(this IAsyncEnumerable<T> e, T defaultValue, Random rng)
         {
+            if (rng is null)
+            {
+                throw new ArgumentNullException(nameof(rng));
+            }
+
             var current = default(T);
             var count = 0;
 
@@ -97,14 +109,7 @@ namespace Rex
 
         public static Guid GetOid(this ClaimsPrincipal user)
         {
-            return Guid.ParseExact(user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value ?? Guid.NewGuid().ToString("D"), "D");
-        }
-
-        public static TView ToViewSafe<TModel, TView>(this Models.IRepresenter<TModel, TView> representer, TModel model)
-            where TView : Models.IView<TModel>
-        {
-            if (model == null) return default(TView);
-            return representer.ToView(model);
+            return Guid.ParseExact(user?.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value ?? Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), "D");
         }
     }
 }

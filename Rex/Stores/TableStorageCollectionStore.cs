@@ -27,10 +27,10 @@ namespace Rex.Stores
 
         public async Task<Collection> GetCollectionAsync(Guid userId, Guid collectionId)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
             var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N"), collectionId.ToString("N"));
-            var result = await table.ExecuteAsync(op);
+            var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var assignment = result?.Result as CollectionEntity;
 
@@ -39,7 +39,7 @@ namespace Rex.Stores
 
         public async IAsyncEnumerable<Collection> GetCollectionsAsync(Guid userId)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
             var query = new TableQuery<CollectionEntity>().Where(
                 TableQuery.GenerateFilterCondition(
@@ -51,7 +51,7 @@ namespace Rex.Stores
             TableContinuationToken continuationToken = null;
             do
             {
-                var result = await table.ExecuteQuerySegmentedAsync(query, continuationToken);
+                var result = await table.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = result.ContinuationToken;
                 count += result.Results.Count;
                 foreach (var idea in result.Results.Select(i => i.Model))
@@ -63,10 +63,10 @@ namespace Rex.Stores
 
         public async Task<bool> RemoveCollectionAsync(Guid userId, Guid collectionId)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
             var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N"), collectionId.ToString("N"));
-            var result = await table.ExecuteAsync(op);
+            var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var assignment = result?.Result as CollectionEntity;
             if (assignment == null)
@@ -75,17 +75,17 @@ namespace Rex.Stores
             }
 
             op = TableOperation.Delete(assignment);
-            result = await table.ExecuteAsync(op);
+            result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             return true;
         }
 
         public async Task<Collection> StoreCollectionAsync(Collection collection)
         {
-            await table.CreateIfNotExistsAsync();
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
             var op = TableOperation.InsertOrReplace(new CollectionEntity(collection));
-            var result = await table.ExecuteAsync(op);
+            var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var assignmentResult = result?.Result as CollectionEntity;
 

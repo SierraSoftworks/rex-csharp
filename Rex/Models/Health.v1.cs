@@ -1,5 +1,6 @@
 using System;
 using System.Xml.Serialization;
+using SierraLib.API.Views;
 
 namespace Rex.Models
 {
@@ -16,6 +17,11 @@ namespace Rex.Models
             {
                 public Health ToModel(Version1 view)
                 {
+                    if (view is null)
+                    {
+                        throw new ArgumentNullException(nameof(view));
+                    }
+
                     return new Health
                     {
                         Ok = view.Ok,
@@ -25,6 +31,11 @@ namespace Rex.Models
 
                 public Version1 ToView(Health model)
                 {
+                    if (model is null)
+                    {
+                        throw new ArgumentNullException(nameof(model));
+                    }
+
                     return new Version1
                     {
                         Ok = model.Ok,

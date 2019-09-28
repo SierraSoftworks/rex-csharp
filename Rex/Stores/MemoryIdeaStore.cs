@@ -7,9 +7,9 @@ using System.Threading;
 
 namespace Rex.Stores
 {
-    public class MemoryIdeaStore : IIdeaStore
+    public sealed class MemoryIdeaStore : IIdeaStore, IDisposable
     {
-        private ReaderWriterLockSlim lockSlim = new ReaderWriterLockSlim();
+        private readonly SemaphoreSlim lockSlim = new SemaphoreSlim(1);
 
         private Dictionary<Guid, Dictionary<Guid, Models.Idea>> _state = new Dictionary<Guid, Dictionary<Guid, Models.Idea>>();
 
@@ -17,40 +17,45 @@ namespace Rex.Stores
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 return this._state.GetValueOrDefault(collection)?.GetValueOrDefault(id);
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
         public async Task<Models.Idea> StoreIdeaAsync(Models.Idea idea)
         {
+            if (idea is null)
+            {
+                throw new ArgumentNullException(nameof(idea));
+            }
+
             try
             {
-                this.lockSlim.EnterWriteLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 this._state[idea.CollectionId] = this._state.GetValueOrDefault(idea.CollectionId) ?? new Dictionary<Guid, Models.Idea>();
                 this._state[idea.CollectionId][idea.Id] = idea;
                 return idea;
             }
             finally
             {
-                this.lockSlim.ExitWriteLock();
+                this.lockSlim.Release();
             }
         }
         public async Task<bool> RemoveIdeaAsync(Guid collection, Guid id)
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
 
                 return this._state.GetValueOrDefault(collection)?.Remove(id) ?? false;
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
@@ -58,13 +63,13 @@ namespace Rex.Stores
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 foreach (var idea in this._state.GetValueOrDefault(collection)?.Values?.ToArray() ?? Array.Empty<Models.Idea>())
                     yield return idea;
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
@@ -72,13 +77,13 @@ namespace Rex.Stores
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 foreach (var idea in this._state.GetValueOrDefault(collection)?.Values?.Where(predicate)?.ToArray() ?? Array.Empty<Models.Idea>())
                     yield return idea;
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
@@ -86,12 +91,12 @@ namespace Rex.Stores
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 return this._state.GetValueOrDefault(collection)?.Values?.RandomOrDefault(null);
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
@@ -99,13 +104,18 @@ namespace Rex.Stores
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 return this._state.GetValueOrDefault(collection)?.Values?.Where(predicate)?.RandomOrDefault(null);
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
+        }
+
+        public void Dispose()
+        {
+            this.lockSlim.Dispose();
         }
     }
 }

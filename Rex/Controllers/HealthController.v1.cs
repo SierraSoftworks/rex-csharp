@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rex.Models;
 using Rex.Stores;
+using SierraLib.API.Views;
 
 namespace Rex.Controllers
 {

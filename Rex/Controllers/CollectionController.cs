@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rex.Models;
+using SierraLib.API.Views;
 
 namespace Rex.Controllers
 {
     public abstract class CollectionController<T> : ControllerBase
-        where T : IView<Collection>
+        where T : class, IView<Collection>
     {
         public CollectionController(Stores.ICollectionStore store, Stores.IRoleAssignmentStore roleStore, IRepresenter<Collection, T> representer)
         {
@@ -29,20 +31,20 @@ namespace Rex.Controllers
         [Authorize(Scopes.CollectionsRead, Roles = "Administrator,User")]
         public virtual async Task<IEnumerable<T>> List()
         {
-            await GetUserCollectionOrCreateAsync();
+            await GetUserCollectionOrCreateAsync().ConfigureAwait(false);
 
-            return (await Store.GetCollectionsAsync(User.GetOid()).ToEnumerable()).Select(Representer.ToView);
+            return (await Store.GetCollectionsAsync(User.GetOid()).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView);
         }
 
         [HttpGet]
         [Route("api/[area]/collection", Name = "GetCollectionForUser.[area]")]
         [Route("api/[area]/collection/{id:Guid}", Name = "GetCollection.[area]")]
         [Authorize(Scopes.CollectionsRead, Roles = "Administrator,User")]
-        public virtual async Task<T> Get(Guid? id)
+        public virtual async Task<T> GetCollection(Guid? id)
         {
             if ((id ?? User.GetOid()) == User.GetOid())
-                return await GetUserCollectionOrCreateAsync();
-            return Representer.ToViewSafe(await this.Store.GetCollectionAsync(User.GetOid(), id ?? User.GetOid()));
+                return await GetUserCollectionOrCreateAsync().ConfigureAwait(false);
+            return Representer.ToViewOrDefault(await Store.GetCollectionAsync(User.GetOid(), id ?? User.GetOid()).ConfigureAwait(false));
         }
 
         [HttpPost]
@@ -64,17 +66,17 @@ namespace Rex.Controllers
                 return this.BadRequest();
             }
 
-            var added = await Store.StoreCollectionAsync(model);
+            var added = await Store.StoreCollectionAsync(model).ConfigureAwait(false);
 
             await RoleStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = added.CollectionId,
                 PrincipalId = added.PrincipalId,
                 Role = RoleAssignment.Owner
-            });
+            }).ConfigureAwait(false);
 
             var area = this.RouteData.Values["area"];
-            return this.CreatedAtRoute($"GetCollection.{area}", new { id = added.CollectionId.ToString("N") }, Representer.ToView(added));
+            return this.CreatedAtRoute($"GetCollection.{area}", new { id = added.CollectionId.ToString("N", CultureInfo.InvariantCulture) }, Representer.ToView(added));
         }
 
         [HttpDelete]
@@ -84,22 +86,22 @@ namespace Rex.Controllers
         {
             var userOid = this.User.GetOid();
 
-            var userRole = await this.RoleStore.GetRoleAssignment(id, userOid);
+            var userRole = await RoleStore.GetRoleAssignment(id, userOid).ConfigureAwait(false);
             if (userRole?.Role == RoleAssignment.Owner)
             {
-                var roleAssignments = await RoleStore.GetRoleAssignments(id).ToEnumerable();
-                if (roleAssignments.Count(c => c.PrincipalId != userOid && c.Role == RoleAssignment.Owner) == 0)
+                var roleAssignments = await RoleStore.GetRoleAssignments(id).ToEnumerable().ConfigureAwait(false);
+                if (!roleAssignments.Any(c => c.PrincipalId != userOid && c.Role == RoleAssignment.Owner))
                 {
                     return this.BadRequest();
                 }
             }
 
-            if (!await this.Store.RemoveCollectionAsync(id, this.User.GetOid()))
+            if (!await Store.RemoveCollectionAsync(id, User.GetOid()).ConfigureAwait(false))
             {
                 return this.NotFound();
             }
 
-            await this.RoleStore.RemoveRoleAssignmentAsync(this.User.GetOid(), id);
+            await RoleStore.RemoveRoleAssignmentAsync(User.GetOid(), id).ConfigureAwait(false);
 
             return this.NoContent();
         }
@@ -108,7 +110,7 @@ namespace Rex.Controllers
         {
             var userOid = User.GetOid();
 
-            var collection = await Store.GetCollectionAsync(userOid, userOid);
+            var collection = await Store.GetCollectionAsync(userOid, userOid).ConfigureAwait(false);
             if (collection == null)
             {
                 collection = await Store.StoreCollectionAsync(new Collection
@@ -116,14 +118,14 @@ namespace Rex.Controllers
                     CollectionId = userOid,
                     PrincipalId = userOid,
                     Name = "Your Ideas",
-                });
+                }).ConfigureAwait(false);
 
                 await RoleStore.StoreRoleAssignmentAsync(new RoleAssignment
                 {
                     CollectionId = userOid,
                     PrincipalId = userOid,
                     Role = RoleAssignment.Owner,
-                });
+                }).ConfigureAwait(false);
             }
 
             return Representer.ToView(collection);

@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rex.Models;
+using SierraLib.API.Views;
 
 namespace Rex.Controllers
 {
     public abstract class HealthController<T> : ControllerBase
-        where T : IView<Health>
+        where T : class, IView<Health>
     {
         public HealthController(Stores.IHealthStore store, IRepresenter<Health, T> representer)
         {
@@ -21,6 +22,6 @@ namespace Rex.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public virtual async Task<T> Get() => Representer.ToViewSafe(await this.Store.GetHealthStateAsync());
+        public virtual async Task<T> GetHealth() => Representer.ToViewOrDefault(await Store.GetHealthStateAsync().ConfigureAwait(false));
     }
 }
