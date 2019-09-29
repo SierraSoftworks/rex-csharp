@@ -1,9 +1,9 @@
 dist: xenial
 addons:
   snaps:
-  - name: dotnet-sdk
-    classic: true
-    channel: latest/beta
+    - name: dotnet-sdk
+      classic: true
+      channel: latest
 sudo: required
 language: csharp
 mono: none
