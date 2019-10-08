@@ -6,7 +6,7 @@ namespace Rex.Stores
 {
     public interface IRoleAssignmentStore
     {
-        Task<Models.RoleAssignment> GetRoleAssignment(Guid collectionId, Guid userId);
+        Task<Models.RoleAssignment?> GetRoleAssignment(Guid collectionId, Guid userId);
 
         IAsyncEnumerable<Models.RoleAssignment> GetRoleAssignments(Guid collectionId);
 

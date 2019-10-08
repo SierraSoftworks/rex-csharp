@@ -18,6 +18,11 @@ namespace Rex.Tests
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            if (builder is null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
             base.ConfigureWebHost(builder);
 
             builder.ConfigureServices(services =>

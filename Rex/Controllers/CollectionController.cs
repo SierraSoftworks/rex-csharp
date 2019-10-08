@@ -40,11 +40,11 @@ namespace Rex.Controllers
         [Route("api/[area]/collection", Name = "GetCollectionForUser.[area]")]
         [Route("api/[area]/collection/{id:Guid}", Name = "GetCollection.[area]")]
         [Authorize(Scopes.CollectionsRead, Roles = "Administrator,User")]
-        public virtual async Task<T> GetCollection(Guid? id)
+        public virtual async Task<ActionResult<T>> GetCollection(Guid? id)
         {
             if ((id ?? User.GetOid()) == User.GetOid())
                 return await GetUserCollectionOrCreateAsync().ConfigureAwait(false);
-            return Representer.ToViewOrDefault(await Store.GetCollectionAsync(User.GetOid(), id ?? User.GetOid()).ConfigureAwait(false));
+            return Representer.ToViewOrDefault(await Store.GetCollectionAsync(User.GetOid(), id ?? User.GetOid()).ConfigureAwait(false)).ToActionResult() ?? this.NotFound();
         }
 
         [HttpPost]

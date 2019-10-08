@@ -6,6 +6,8 @@ using System.Linq;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
+using SierraLib.API.Views;
 
 namespace Rex.Stores
 {
@@ -24,17 +26,18 @@ namespace Rex.Stores
         private readonly CloudTable table;
         private readonly ILogger<TableStorageIdeaStore> logger;
         private readonly Random random;
+        private readonly IRepresenter<Collection, CollectionEntity> representer = new CollectionEntity.Representer();
 
-        public async Task<Collection> GetCollectionAsync(Guid userId, Guid collectionId)
+        public async Task<Collection?> GetCollectionAsync(Guid userId, Guid collectionId)
         {
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-            var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N"), collectionId.ToString("N"));
+            var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N", CultureInfo.InvariantCulture), collectionId.ToString("N", CultureInfo.InvariantCulture));
             var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var assignment = result?.Result as CollectionEntity;
 
-            return assignment?.Model;
+            return this.representer.ToModelOrDefault(assignment);
         }
 
         public async IAsyncEnumerable<Collection> GetCollectionsAsync(Guid userId)
@@ -45,16 +48,16 @@ namespace Rex.Stores
                 TableQuery.GenerateFilterCondition(
                     "PartitionKey",
                     QueryComparisons.Equal,
-                    userId.ToString("N")));
+                    userId.ToString("N", CultureInfo.InvariantCulture)));
 
             var count = 0;
-            TableContinuationToken continuationToken = null;
+            TableContinuationToken? continuationToken = null;
             do
             {
                 var result = await table.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = result.ContinuationToken;
                 count += result.Results.Count;
-                foreach (var idea in result.Results.Select(i => i.Model))
+                foreach (var idea in result.Results.Select(this.representer.ToModel))
                     yield return idea;
             } while (continuationToken != null);
 
@@ -65,55 +68,68 @@ namespace Rex.Stores
         {
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-            var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N"), collectionId.ToString("N"));
+            var op = TableOperation.Retrieve<CollectionEntity>(userId.ToString("N", CultureInfo.InvariantCulture), collectionId.ToString("N", CultureInfo.InvariantCulture));
             var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
-            var assignment = result?.Result as CollectionEntity;
-            if (assignment == null)
+            if (!(result?.Result is CollectionEntity assignment))
             {
                 return false;
             }
 
             op = TableOperation.Delete(assignment);
-            result = await table.ExecuteAsync(op).ConfigureAwait(false);
+            await table.ExecuteAsync(op).ConfigureAwait(false);
 
             return true;
         }
 
         public async Task<Collection> StoreCollectionAsync(Collection collection)
         {
+            if (collection is null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
+
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
-            var op = TableOperation.InsertOrReplace(new CollectionEntity(collection));
+            var op = TableOperation.InsertOrReplace(this.representer.ToView(collection));
             var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
             var assignmentResult = result?.Result as CollectionEntity;
 
-            return assignmentResult?.Model;
+            return this.representer.ToModelOrDefault(assignmentResult) ?? throw new Exception("Failed to store collection.");
         }
 
-        private class CollectionEntity : TableEntity
+        private class CollectionEntity : TableEntity, IView<Collection>
         {
             public CollectionEntity()
             {
 
             }
 
-            public CollectionEntity(Models.Collection collection)
+            public string? Name { get; set; }
+
+            public class Representer : IRepresenter<Collection, CollectionEntity>
             {
-                this.PartitionKey = (collection.PrincipalId == Guid.Empty ? Guid.NewGuid() : collection.PrincipalId).ToString("N");
-                this.RowKey = (collection.CollectionId == Guid.Empty ? Guid.NewGuid() : collection.CollectionId).ToString("N");
-                this.Name = collection.Name;
+                public Collection ToModel(CollectionEntity view)
+                {
+                    return new Collection
+                    {
+                        PrincipalId = Guid.ParseExact(view.PartitionKey, "N"),
+                        CollectionId = Guid.ParseExact(view.RowKey, "N"),
+                        Name = view.Name ?? throw new NullReferenceException("Collection name must not be null.")
+                    };
+                }
+
+                public CollectionEntity ToView(Collection model)
+                {
+                    return new CollectionEntity
+                    {
+                        PartitionKey = (model.PrincipalId == Guid.Empty ? Guid.NewGuid() : model.PrincipalId).ToString("N", CultureInfo.InvariantCulture),
+                        RowKey = (model.CollectionId == Guid.Empty ? Guid.NewGuid() : model.CollectionId).ToString("N", CultureInfo.InvariantCulture),
+                        Name = model.Name,
+                    };
+                }
             }
-
-            public string Name { get; set; }
-
-            public Models.Collection Model => new Models.Collection()
-            {
-                PrincipalId = Guid.ParseExact(this.PartitionKey, "N"),
-                CollectionId = Guid.ParseExact(this.RowKey, "N"),
-                Name = this.Name
-            };
         }
     }
 }

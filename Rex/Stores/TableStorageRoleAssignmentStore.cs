@@ -29,7 +29,7 @@ namespace Rex.Stores
         private readonly IRepresenter<RoleAssignment, RoleAssignmentEntity> representer;
         private readonly Random random;
 
-        public async Task<RoleAssignment> GetRoleAssignment(Guid collectionId, Guid userId)
+        public async Task<RoleAssignment?> GetRoleAssignment(Guid collectionId, Guid userId)
         {
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
@@ -52,7 +52,7 @@ namespace Rex.Stores
                     collectionId.ToString("N", CultureInfo.InvariantCulture)));
 
             var count = 0;
-            TableContinuationToken continuationToken = null;
+            TableContinuationToken? continuationToken = null;
             do
             {
                 var result = await table.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
@@ -72,14 +72,13 @@ namespace Rex.Stores
             var op = TableOperation.Retrieve<RoleAssignmentEntity>(collectionId.ToString("N", CultureInfo.InvariantCulture), userId.ToString("N", CultureInfo.InvariantCulture));
             var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
-            var assignment = result?.Result as RoleAssignmentEntity;
-            if (assignment == null)
+            if (!(result?.Result is RoleAssignmentEntity assignment))
             {
                 return false;
             }
 
             op = TableOperation.Delete(assignment);
-            result = await table.ExecuteAsync(op).ConfigureAwait(false);
+            await table.ExecuteAsync(op).ConfigureAwait(false);
 
             return true;
         }
@@ -93,7 +92,7 @@ namespace Rex.Stores
 
             var assignmentResult = result?.Result as RoleAssignmentEntity;
 
-            return this.representer.ToModelOrDefault(assignmentResult);
+            return this.representer.ToModelOrDefault(assignmentResult) ?? throw new Exception("Failed to store role assignment.");
         }
 
         public class RoleAssignmentEntity : TableEntity, IView<RoleAssignment>
@@ -103,7 +102,7 @@ namespace Rex.Stores
 
             }
 
-            public string Role { get; set; }
+            public string? Role { get; set; }
 
             public class Representer : IRepresenter<RoleAssignment, RoleAssignmentEntity>
             {
@@ -118,7 +117,7 @@ namespace Rex.Stores
                     {
                         CollectionId = Guid.ParseExact(view.PartitionKey, "N"),
                         PrincipalId = Guid.ParseExact(view.RowKey, "N"),
-                        Role = view.Role
+                        Role = view.Role ?? throw new NullReferenceException("The role of a role assignment must not be null")
                     };
                 }
 
@@ -134,7 +133,7 @@ namespace Rex.Stores
                         PartitionKey = (model.CollectionId == Guid.Empty ? Guid.NewGuid() : model.CollectionId).ToString("N", CultureInfo.InvariantCulture),
                         RowKey = (model.PrincipalId == Guid.Empty ? Guid.NewGuid() : model.PrincipalId).ToString("N", CultureInfo.InvariantCulture),
                         Role = model.Role,
-                };
+                    };
                 }
             }
         }

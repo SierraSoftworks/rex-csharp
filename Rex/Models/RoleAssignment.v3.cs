@@ -11,13 +11,13 @@ namespace Rex.Models
         public class Version3 : IView<RoleAssignment>
         {
             [XmlAttribute("PrincipalId")]
-            public string PrincipalId { get; set; }
+            public string? PrincipalId { get; set; }
 
             [XmlAttribute("CollectionId")]
-            public string CollectionId { get; set; }
+            public string? CollectionId { get; set; }
 
             [XmlAttribute("Role")]
-            public string Role { get; set; }
+            public string? Role { get; set; }
 
             public class Representer : IRepresenter<RoleAssignment, Version3>
             {
@@ -32,7 +32,7 @@ namespace Rex.Models
                     {
                         PrincipalId = view.PrincipalId != null ? Guid.ParseExact(view.PrincipalId, "N") : Guid.Empty,
                         CollectionId = view.CollectionId != null ? Guid.ParseExact(view.CollectionId, "N") : Guid.Empty,
-                        Role = view.Role,
+                        Role = view.Role ?? throw new NullReferenceException("The role name must not be null"),
                     };
                 }
 

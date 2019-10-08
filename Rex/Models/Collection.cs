@@ -8,6 +8,6 @@ namespace Rex.Models
 
         public Guid PrincipalId { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
     }
 }

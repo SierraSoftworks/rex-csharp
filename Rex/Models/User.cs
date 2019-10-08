@@ -6,8 +6,8 @@ namespace Rex.Models
     {
         public Guid PrincipalId { get; set; }
 
-        public string EmailHash { get; set; }
+        public string EmailHash { get; set; } = "";
 
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = "";
     }
 }

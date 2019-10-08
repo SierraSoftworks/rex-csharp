@@ -29,7 +29,7 @@ namespace Rex.Stores
         private readonly IRepresenter<Idea, IdeaEntity> representer;
         private readonly Random random;
 
-        public async Task<Idea> GetIdeaAsync(Guid collection, Guid id)
+        public async Task<Idea?> GetIdeaAsync(Guid collection, Guid id)
         {
             await table.CreateIfNotExistsAsync().ConfigureAwait(false);
 
@@ -52,7 +52,7 @@ namespace Rex.Stores
                     collection.ToString("N", CultureInfo.InvariantCulture)));
 
             var count = 0;
-            TableContinuationToken continuationToken = null;
+            TableContinuationToken? continuationToken = null;
             do
             {
                 var result = await table.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
@@ -70,12 +70,12 @@ namespace Rex.Stores
             return GetIdeasAsync(collection).Where(predicate);
         }
 
-        public async Task<Idea> GetRandomIdeaAsync(Guid collection)
+        public async Task<Idea?> GetRandomIdeaAsync(Guid collection)
         {
             return await GetIdeasAsync(collection).RandomOrDefaultWith(null, random).ConfigureAwait(false);
         }
 
-        public async Task<Idea> GetRandomIdeaAsync(Guid collection, Func<Idea, bool> predicate)
+        public async Task<Idea?> GetRandomIdeaAsync(Guid collection, Func<Idea, bool> predicate)
         {
             return await GetIdeasAsync(collection).Where(predicate).RandomOrDefaultWith(null, random).ConfigureAwait(false);
         }
@@ -87,14 +87,13 @@ namespace Rex.Stores
             var op = TableOperation.Retrieve<IdeaEntity>(collection.ToString("N", CultureInfo.InvariantCulture), id.ToString("N", CultureInfo.InvariantCulture));
             var result = await table.ExecuteAsync(op).ConfigureAwait(false);
 
-            var idea = result?.Result as IdeaEntity;
-            if (idea == null)
+            if (!(result?.Result is IdeaEntity idea))
             {
                 return false;
             }
 
             op = TableOperation.Delete(idea);
-            result = await table.ExecuteAsync(op).ConfigureAwait(false);
+            await table.ExecuteAsync(op).ConfigureAwait(false);
 
             return true;
         }
@@ -108,7 +107,7 @@ namespace Rex.Stores
 
             var ideaResult = result?.Result as IdeaEntity;
 
-            return this.representer.ToModelOrDefault(ideaResult);
+            return this.representer.ToModelOrDefault(ideaResult) ?? throw new Exception("Failed to store idea.");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "This is required to represent the model.")]
@@ -119,13 +118,13 @@ namespace Rex.Stores
 
             }
 
-            public string Name { get; set; }
+            public string? Name { get; set; }
 
-            public string Description { get; set; }
+            public string? Description { get; set; }
 
             public bool Completed { get; set; }
 
-            public string Tags { get; set; }
+            public string? Tags { get; set; }
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "This is required to represent the view.")]
             public class Representer : IRepresenter<Idea, IdeaEntity>
@@ -141,10 +140,10 @@ namespace Rex.Stores
                     {
                         CollectionId = Guid.ParseExact(view.PartitionKey, "N"),
                         Id = Guid.ParseExact(view.RowKey, "N"),
-                        Name = view.Name,
-                        Description = view.Description,
+                        Name = view.Name ?? throw new NullReferenceException("The name of an idea must not be null"),
+                        Description = view.Description ?? throw new NullReferenceException("The description of an idea must not be null"),
                         Completed = view.Completed,
-                        Tags = view.Tags.Split(",").Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)).ToHashSet()
+                        Tags = view.Tags?.Split(",")?.Select(t => t.Trim())?.Where(t => !string.IsNullOrEmpty(t))?.ToHashSet() ?? new HashSet<string>()
                     };
                 }
 
@@ -163,7 +162,7 @@ namespace Rex.Stores
                         Description = model.Description,
                         Completed = model.Completed,
                         Tags = string.Join(',', model.Tags),
-                };
+                    };
                 }
             }
         }

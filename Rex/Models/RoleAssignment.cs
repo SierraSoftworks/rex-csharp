@@ -8,7 +8,7 @@ namespace Rex.Models
 
         public Guid CollectionId { get; set; }
 
-        public string Role { get; set; }
+        public string Role { get; set; } = Viewer;
 
         public const string Owner = "Owner";
 

@@ -116,7 +116,7 @@ namespace Rex.Controllers
                 return this.Forbid();
             }
 
-            return (await Store.GetIdeasAsync(collection ?? User.GetOid()).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView).ToActionResult();
+            return (await Store.GetIdeasAsync(collection ?? User.GetOid()).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView).ToActionResult() ?? this.NotFound();
         }
 
 
@@ -174,7 +174,7 @@ namespace Rex.Controllers
             return this.NoContent();
         }
 
-        protected async Task<RoleAssignment> GetUserRoleOrCreateDefault(Guid? collection)
+        protected async Task<RoleAssignment?> GetUserRoleOrCreateDefault(Guid? collection)
         {
             var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid()).ConfigureAwait(false);
             if (role == null && (collection == null || collection == User.GetOid()))

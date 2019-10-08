@@ -11,13 +11,13 @@ namespace Rex.Models
         public class Version3 : IView<User>
         {
             [XmlAttribute("id")]
-            public string ID { get; set; }
+            public string? Id { get; set; }
 
             [XmlAttribute("email-hash")]
-            public string EmailHash { get; set; }
+            public string? EmailHash { get; set; }
 
             [XmlElement("first-name")]
-            public string FirstName { get; set; }
+            public string? FirstName { get; set; }
 
             public class Representer : IRepresenter<User, Version3>
             {
@@ -30,9 +30,9 @@ namespace Rex.Models
 
                     return new User
                     {
-                        PrincipalId = Guid.ParseExact(view.ID, "N"),
-                        EmailHash = view.EmailHash,
-                        FirstName = view.FirstName,
+                        PrincipalId = Guid.ParseExact(view.Id ?? throw new NullReferenceException("The principal ID of the user must not be null"), "N"),
+                        EmailHash = view.EmailHash ?? throw new NullReferenceException("The email hash of the user must not be null"),
+                        FirstName = view.FirstName ?? throw new NullReferenceException("The name of the user must not be null"),
                     };
                 }
 
@@ -45,7 +45,7 @@ namespace Rex.Models
 
                     return new Version3
                     {
-                        ID = model.PrincipalId.ToString("N", CultureInfo.InvariantCulture),
+                        Id = model.PrincipalId.ToString("N", CultureInfo.InvariantCulture),
                         EmailHash = model.EmailHash,
                         FirstName = model.FirstName,
                     };

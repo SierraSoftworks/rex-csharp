@@ -13,13 +13,13 @@ namespace Rex.Models
         {
 
             [XmlAttribute("Id")]
-            public string Id { get; set; }
+            public string? Id { get; set; }
 
             [XmlElement("Name")]
-            public string Name { get; set; }
+            public string? Name { get; set; }
 
             [XmlElement("Description")]
-            public string Description { get; set; }
+            public string? Description { get; set; }
 
             [XmlAttribute("Completed")]
             public bool? Completed { get; set; }
@@ -27,7 +27,7 @@ namespace Rex.Models
             [XmlArray("Tags")]
             [XmlArrayItem("Tag")]
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "This models the API response.")]
-            public string[] Tags { get; set; }
+            public string[] Tags { get; set; } = Array.Empty<string>();
 
             public class Representer : IRepresenter<Idea, Version2>
             {
@@ -42,8 +42,8 @@ namespace Rex.Models
                     {
                         CollectionId = Guid.Empty,
                         Id = view.Id != null ? Guid.Parse(view.Id) : Guid.NewGuid(),
-                        Name = view.Name,
-                        Description = view.Description,
+                        Name = view.Name ?? throw new NullReferenceException("The name of the idea must not be null"),
+                        Description = view.Description ?? throw new NullReferenceException("The description of the idea must not be null"),
                         Completed = view.Completed ?? false,
                         Tags = new System.Collections.Generic.HashSet<string>(view.Tags ?? Array.Empty<string>()),
                     };

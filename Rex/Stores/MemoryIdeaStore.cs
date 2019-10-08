@@ -1,19 +1,21 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 
 namespace Rex.Stores
 {
+    [SuppressMessage("Await.Warning", "CS1997", Justification = "This in-memory implementation doesn't await anything.")]
     public sealed class MemoryIdeaStore : IIdeaStore, IDisposable
     {
         private readonly SemaphoreSlim lockSlim = new SemaphoreSlim(1);
 
         private Dictionary<Guid, Dictionary<Guid, Models.Idea>> _state = new Dictionary<Guid, Dictionary<Guid, Models.Idea>>();
 
-        public async Task<Models.Idea> GetIdeaAsync(Guid collection, Guid id)
+        public async Task<Models.Idea?> GetIdeaAsync(Guid collection, Guid id)
         {
             try
             {
@@ -87,7 +89,7 @@ namespace Rex.Stores
             }
         }
 
-        public async Task<Models.Idea> GetRandomIdeaAsync(Guid collection)
+        public async Task<Models.Idea?> GetRandomIdeaAsync(Guid collection)
         {
             try
             {
@@ -100,7 +102,7 @@ namespace Rex.Stores
             }
         }
 
-        public async Task<Models.Idea> GetRandomIdeaAsync(Guid collection, Func<Models.Idea, bool> predicate)
+        public async Task<Models.Idea?> GetRandomIdeaAsync(Guid collection, Func<Models.Idea, bool> predicate)
         {
             try
             {

@@ -12,13 +12,13 @@ namespace Rex.Models
         {
 
             [XmlAttribute("Id")]
-            public string Id { get; set; }
+            public string? Id { get; set; }
 
             [XmlElement("Name")]
-            public string Name { get; set; }
+            public string? Name { get; set; }
 
             [XmlElement("Description")]
-            public string Description { get; set; }
+            public string? Description { get; set; }
 
             public class Representer : IRepresenter<Idea, Version1>
             {
@@ -33,8 +33,8 @@ namespace Rex.Models
                     {
                         CollectionId = Guid.Empty,
                         Id = view.Id != null ? Guid.Parse(view.Id) : Guid.NewGuid(),
-                        Name = view.Name,
-                        Description = view.Description,
+                        Name = view.Name ?? throw new NullReferenceException("The name of the idea must not be null"),
+                        Description = view.Description ?? throw new NullReferenceException("The description of the idea must not be null"),
                         Completed = false,
                         Tags = new System.Collections.Generic.HashSet<string>(),
                     };

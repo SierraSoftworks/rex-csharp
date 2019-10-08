@@ -6,7 +6,7 @@ namespace Rex.Stores
 {
     public interface ICollectionStore
     {
-        Task<Models.Collection> GetCollectionAsync(Guid userId, Guid collectionId);
+        Task<Models.Collection?> GetCollectionAsync(Guid userId, Guid collectionId);
 
         IAsyncEnumerable<Models.Collection> GetCollectionsAsync(Guid userId);
 

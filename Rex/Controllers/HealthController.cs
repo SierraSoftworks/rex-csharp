@@ -22,6 +22,6 @@ namespace Rex.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public virtual async Task<T> GetHealth() => Representer.ToViewOrDefault(await Store.GetHealthStateAsync().ConfigureAwait(false));
+        public virtual async Task<T> GetHealth() => Representer.ToView(await Store.GetHealthStateAsync().ConfigureAwait(false));
     }
 }

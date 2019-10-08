@@ -11,13 +11,13 @@ namespace Rex.Models
         public class Version3 : IView<Collection>
         {
             [XmlAttribute("id")]
-            public string ID { get; set; }
+            public string? Id { get; set; }
 
             [XmlAttribute("user-id")]
-            public string UserID { get; set; }
+            public string? UserId { get; set; }
 
             [XmlAttribute("name")]
-            public string Name { get; set; }
+            public string? Name { get; set; }
 
             public class Representer : IRepresenter<Collection, Version3>
             {
@@ -30,9 +30,9 @@ namespace Rex.Models
 
                     return new Collection
                     {
-                        CollectionId = view.ID != null ? Guid.ParseExact(view.ID, "N") : Guid.NewGuid(),
-                        PrincipalId = view.UserID != null ? Guid.ParseExact(view.UserID, "N") : Guid.Empty,
-                        Name = view.Name,
+                        CollectionId = view.Id != null ? Guid.ParseExact(view.Id, "N") : Guid.NewGuid(),
+                        PrincipalId = view.UserId != null ? Guid.ParseExact(view.UserId, "N") : Guid.Empty,
+                        Name = view.Name ?? throw new NullReferenceException("The name of the collection should not be null"),
                     };
                 }
 
@@ -45,8 +45,8 @@ namespace Rex.Models
 
                     return new Version3
                     {
-                        ID = model.CollectionId.ToString("N", CultureInfo.InvariantCulture),
-                        UserID = model.PrincipalId.ToString("N", CultureInfo.InvariantCulture),
+                        Id = model.CollectionId.ToString("N", CultureInfo.InvariantCulture),
+                        UserId = model.PrincipalId.ToString("N", CultureInfo.InvariantCulture),
                         Name = model.Name
                     };
                 }

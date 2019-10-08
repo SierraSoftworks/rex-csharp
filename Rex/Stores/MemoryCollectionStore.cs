@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,22 +8,23 @@ using Rex.Models;
 
 namespace Rex.Stores
 {
-    public class MemoryCollectionStore : ICollectionStore
+    [SuppressMessage("Await.Warning", "CS1998", Justification = "This in-memory implementation doesn't await anything.")]
+    public sealed class MemoryCollectionStore : ICollectionStore, IDisposable
     {
-        private ReaderWriterLockSlim lockSlim = new ReaderWriterLockSlim();
+        private SemaphoreSlim lockSlim = new SemaphoreSlim(1);
 
         private Dictionary<Guid, Dictionary<Guid, Models.Collection>> _state = new Dictionary<Guid, Dictionary<Guid, Models.Collection>>();
 
-        public async Task<Collection> GetCollectionAsync(Guid userId, Guid collectionId)
+        public async Task<Collection?> GetCollectionAsync(Guid userId, Guid collectionId)
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 return this._state.GetValueOrDefault(userId)?.GetValueOrDefault(collectionId);
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
@@ -30,13 +32,13 @@ namespace Rex.Stores
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 foreach (var assignment in this._state.GetValueOrDefault(userId)?.Values.ToArray() ?? Array.Empty<Collection>())
                     yield return assignment;
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
@@ -44,29 +46,39 @@ namespace Rex.Stores
         {
             try
             {
-                this.lockSlim.EnterReadLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
 
                 return this._state.GetValueOrDefault(userId)?.Remove(collectionId) ?? false;
             }
             finally
             {
-                this.lockSlim.ExitReadLock();
+                this.lockSlim.Release();
             }
         }
 
         public async Task<Collection> StoreCollectionAsync(Collection collection)
         {
+            if (collection is null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
+
             try
             {
-                this.lockSlim.EnterWriteLock();
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
                 this._state[collection.PrincipalId] = this._state.GetValueOrDefault(collection.PrincipalId) ?? new Dictionary<Guid, Models.Collection>();
                 this._state[collection.PrincipalId][collection.CollectionId] = collection;
                 return collection;
             }
             finally
             {
-                this.lockSlim.ExitWriteLock();
+                this.lockSlim.Release();
             }
+        }
+
+        public void Dispose()
+        {
+            this.lockSlim.Dispose();
         }
     }
 }
