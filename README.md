@@ -1,7 +1,7 @@
 # Rex 
 **Keep track of various ideas and randomly select one on demand**
 
-[![Travis (.com)](https://img.shields.io/travis/com/SierraSoftworks/rex-csharp.svg?style=for-the-badge)](https://travis-ci.com/SierraSoftworks/rex-csharp)
+![Azure DevOps builds](https://img.shields.io/azure-devops/build/sierrasoftworks/d5e46d6d-e6a4-4338-b354-31935571eed9/14?style=for-the-badge)
 [![API docs](https://img.shields.io/badge/docs-api-blue.svg?style=for-the-badge)](https://rexapp.docs.apiary.io)
 ![GitHub](https://img.shields.io/github/license/SierraSoftworks/rex-csharp.svg?style=for-the-badge)
 
