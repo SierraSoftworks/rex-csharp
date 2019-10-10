@@ -11,13 +11,13 @@ using System;
 
 namespace Rex.Tests.Controllers
 {
-    public class IdeaControllerV1Tests
-        : IdeaControllerTests<Idea.Version1>
+    public class IdeaControllerV2Tests
+        : IdeaControllerTests<Idea.Version2>
     {
-        public IdeaControllerV1Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        public IdeaControllerV2Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
         }
 
-        protected override string Version => "v1";
+        protected override string Version => "v2";
     }
 }
