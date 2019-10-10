@@ -11,7 +11,7 @@ namespace Rex.Controllers
     public class AuthController : ControllerBase
     {
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public virtual ActionResult GetClaims() => Ok(this.User.Claims.GroupBy(c => c.Type).ToDictionary(g => g.Key, g => g.Count() == 1 ? (object)g.Single().Value : g.Select(c => c.Value).ToArray()));
     }
 }
