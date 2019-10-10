@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 using SierraLib.API.Views;
+using Xunit.Abstractions;
 
 namespace Rex.Tests.Controllers
 {
@@ -14,15 +15,15 @@ namespace Rex.Tests.Controllers
         : IClassFixture<WebApplicationFactory<Startup>>
         where TView : class, IView<Health>
     {
-        public HealthControllerTests(WebApplicationFactory<Startup> factory)
+        public HealthControllerTests(ITestOutputHelper testOutputHelper)
         {
-            this.Factory = factory ?? throw new ArgumentNullException(nameof(factory));
-            this.Representer = factory.Services.GetService<IRepresenter<Health, TView>>();
+            this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
+            this.Representer = this.Factory.Services.GetService<IRepresenter<Health, TView>>();
         }
 
         protected abstract string Version { get; }
 
-        WebApplicationFactory<Startup> Factory { get; }
+        RexAppFactory Factory { get; }
 
         public IRepresenter<Health, TView> Representer { get; }
 

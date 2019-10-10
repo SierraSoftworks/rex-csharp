@@ -76,6 +76,19 @@ namespace Rex.Stores
             }
         }
 
+        public async Task ClearAsync()
+        {
+            try
+            {
+                await this.lockSlim.WaitAsync().ConfigureAwait(false);
+                this._state.Clear();
+            }
+            finally
+            {
+                this.lockSlim.Release();
+            }
+        }
+
         public void Dispose()
         {
             this.lockSlim.Dispose();

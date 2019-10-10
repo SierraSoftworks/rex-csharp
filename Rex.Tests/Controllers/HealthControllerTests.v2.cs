@@ -1,12 +1,13 @@
 ﻿using Rex.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Xunit.Abstractions;
 
 namespace Rex.Tests.Controllers
 {
     public class HealthControllerV2Tests
         : HealthControllerTests<Health.Version1>
     {
-        public HealthControllerV2Tests(WebApplicationFactory<Startup> factory) : base(factory)
+        public HealthControllerV2Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
         }
 
