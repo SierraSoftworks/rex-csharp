@@ -28,13 +28,13 @@ namespace Rex.Tests.Controllers
         public IRepresenter<Idea, TView> Representer { get; }
 
         [Theory]
-        [InlineData("/api/v1/ideas", "https://rex.sierrasoftworks.com")]
-        [InlineData("/api/v1/ideas", "https://example.com")]
-        public async Task TestCors(string endpoint, string origin)
+        [InlineData("https://rex.sierrasoftworks.com")]
+        [InlineData("https://example.com")]
+        public async Task TestCors(string origin)
         {
-            var client = Factory.CreateAuthenticatedClient();
+            var client = Factory.CreateAuthenticatedClient("Administrator", "Ideas.Read");
 
-            using (var request = new HttpRequestMessage(HttpMethod.Get, endpoint))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/{Version}/ideas"))
             {
                 request.Headers.Add("Origin", origin);
                 var response = await client.SendAsync(request).ConfigureAwait(false);

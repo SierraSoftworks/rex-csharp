@@ -25,10 +25,10 @@ namespace Rex.Tests.Controllers
         {
             await Factory.ClearAsync().ConfigureAwait(false);
 
-            var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection(Factory.PrincipalId, Factory.PrincipalId)).ConfigureAwait(false);
+            var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection(Tokens.PrincipalId, Tokens.PrincipalId)).ConfigureAwait(false);
             var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(false);
 
-            var client = Factory.CreateAuthenticatedClient();
+            var client = Factory.CreateAuthenticatedClient("User", "Ideas.Read");
 
             var response = await client.GetAsync(new Uri($"/api/{Version}/idea/{idea.Id.ToString("N", CultureInfo.InvariantCulture)}", UriKind.Relative)).ConfigureAwait(false);
             response.Should().NotBeNull();
@@ -45,7 +45,7 @@ namespace Rex.Tests.Controllers
         {
             await Factory.ClearAsync().ConfigureAwait(false);
 
-            var client = Factory.CreateAuthenticatedClient();
+            var client = Factory.CreateAuthenticatedClient("User", "Ideas.Read");
 
             var response = await client.GetAsync(new Uri($"/api/{Version}/idea/{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}", UriKind.Relative)).ConfigureAwait(false);
             response.Should().NotBeNull();

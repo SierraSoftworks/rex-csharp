@@ -41,14 +41,17 @@ namespace Rex.Tests
             await ((RoleAssignmentStore as MemoryRoleAssignmentStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
         }
 
-        public Guid PrincipalId => Guid.Parse("d6cf5e7f-b12a-444d-8c7f-6790b77e49a9");
+        public HttpClient CreateAuthenticatedClient(string role, params string[] scopes)
+        {
+            return this.CreateAuthenticatedClient(new[] { role }, scopes);
+        }
 
-        public string AuthToken => "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJ0ZXN0cyIsImlzcyI6InRlc3RzIiwiaWF0IjoxNTAwMDAwMDAwLCJuYmYiOjE1MDAwMDAwMDAsImV4cCI6MjUwMDAwMDAwMCwiYWNyIjoiMSIsImFtciI6WyJwd2QiLCJtZmEiXSwiYXBwaWQiOiI3YTZkNmVhZS02Y2VlLTQzZDYtYWY1Ny0zZGE5MDhiMGYxMjAiLCJhcHBpZGFjciI6IjAiLCJkZXZpY2VpZCI6IjYxMzRjOWM5LWI4OTMtNDY1MS05ZmQxLTM2MThkYjhkMWZjNCIsImZhbWlseV9uYW1lIjoiTWNUZXN0ZXJzb24iLCJnaXZlbl9uYW1lIjoiVGVzdHkiLCJuYW1lIjoiVGVzdHkgTWNUZXN0ZXJzb24iLCJvaWQiOiJkNmNmNWU3Zi1iMTJhLTQ0NGQtOGM3Zi02NzkwYjc3ZTQ5YTkiLCJyb2xlcyI6WyJBZG1pbmlzdHJhdG9yIl0sInNjcCI6InVzZXJfaW1wZXJzb25hdGlvbiBJZGVhcy5SZWFkIElkZWFzLldyaXRlIENvbGxlY3Rpb25zLlJlYWQgQ29sbGVjdGlvbnMuV3JpdGUgUm9sZUFzc2lnbm1lbnRzLldyaXRlIiwic3ViIjoiWHdxMnNRSkVZVWJ4a3dWXzBWOUdnX25JQVcybVdYOXRKbnRfR3Fya2RibSIsInRpZCI6IjZhZGEwNjFiLTE2NmMtNGE3My1iMzZkLWM3N2Q2Y2M4Y2FhNCIsInVuaXF1ZV9uYW1lIjoidGVzdHlAdGVzdGVyc29uLmNvbSIsInVwbiI6InRlc3R5QHRlc3RlcnNvbi5jb20iLCJ2ZXIiOiIxLjAifQ.raXl7qG0q-YeiLoNCPFnK2DVSpHtLR1STUoVyZFLH6U";
-
-        public HttpClient CreateAuthenticatedClient()
+        public HttpClient CreateAuthenticatedClient(IEnumerable<string>? roles = null, IEnumerable<string>? scopes = null)
         {
             var client = this.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", this.AuthToken);
+            var token = Tokens.GetToken(roles, scopes);
+            this.testOutputHelper.WriteLine("Using authentication token {0}", token);
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             return client;
         }
@@ -98,7 +101,7 @@ namespace Rex.Tests
                     o.RequireHttpsMetadata = false;
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-256-bit-secret")),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Tokens.SigningKey)),
                         RequireSignedTokens = true,
 
                         ValidIssuer = "tests",
