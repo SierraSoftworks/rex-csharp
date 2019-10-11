@@ -157,11 +157,11 @@ namespace Rex.Controllers
         [HttpDelete]
         [Route("api/[area]/idea/{id:Guid}", Name = "RemoveIdea.[area]")]
         [Route("api/[area]/collection/{collection:Guid}/idea/{id:Guid}", Name = "RemoveIdeaByCollection.[area]")]
-        [Authorize(Scopes.IdeasWrite, Roles = "Administrator")]
+        [Authorize(Scopes.IdeasWrite, Roles = "Administrator,User")]
         public virtual async Task<ActionResult> Delete(Guid id, Guid? collection)
         {
             var role = await GetUserRoleOrCreateDefault(collection).ConfigureAwait(false);
-            if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
+            if ((role?.Role ?? RoleAssignment.Viewer) != RoleAssignment.Owner)
             {
                 return this.Forbid();
             }
@@ -177,11 +177,11 @@ namespace Rex.Controllers
         protected async Task<RoleAssignment?> GetUserRoleOrCreateDefault(Guid? collection)
         {
             var role = await RoleStore.GetRoleAssignment(collection ?? User.GetOid(), User.GetOid()).ConfigureAwait(false);
-            if (role == null && (collection == null || collection == User.GetOid()))
+            if (role is null && (collection is null || collection == User.GetOid()))
             {
                 role = await RoleStore.StoreRoleAssignmentAsync(new RoleAssignment
                 {
-                    CollectionId = collection ?? User.GetOid(),
+                    CollectionId = User.GetOid(),
                     PrincipalId = User.GetOid(),
                     Role = RoleAssignment.Owner
                 }).ConfigureAwait(false);
