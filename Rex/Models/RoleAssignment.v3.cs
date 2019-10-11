@@ -10,13 +10,13 @@ namespace Rex.Models
         [XmlType("Health")]
         public class Version3 : IView<RoleAssignment>
         {
-            [XmlAttribute("PrincipalId")]
+            [XmlAttribute("user-id")]
             public string? PrincipalId { get; set; }
 
-            [XmlAttribute("CollectionId")]
+            [XmlAttribute("collection-id")]
             public string? CollectionId { get; set; }
 
-            [XmlAttribute("Role")]
+            [XmlAttribute("role")]
             public string? Role { get; set; }
 
             public class Representer : IRepresenter<RoleAssignment, Version3>

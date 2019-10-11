@@ -95,10 +95,15 @@ paths:
                 description: The list of ideas registered with the server.
                 items:
                   $ref: "#/components/schemas/IdeaV1"
-              example:
-                - id: "225c5957d7f450baec75a67ede427e9"
-                  name: "Test Idea"
-                  description: "This is a test idea"
+            text/xml:
+              schema:
+                type: array
+                description: The list of ideas registered with the server.
+                items:
+                  $ref: "#/components/schemas/IdeaV1"
+                xml:
+                  name: Ideas
+                  wrapped: true
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -131,9 +136,9 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/IdeaV1"
-            example:
-              name: "Test Idea"
-              description: "This is a test idea"
+          text/xml:
+            schema:
+              $ref: "#/components/schemas/IdeaV1"
       responses:
         201:
           description: Idea was created.
@@ -146,10 +151,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV1"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV1"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -175,10 +179,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV1"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV1"
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -222,10 +225,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV1"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV1"
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -266,9 +268,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/IdeaV1"
-            example:
-              name: "Test Idea"
-              description: "This is a test idea"
       responses:
         200:
           description: Stored idea
@@ -276,10 +275,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV1"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV1"
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -369,13 +367,16 @@ paths:
                 description: The list of ideas registered with the server.
                 items:
                   $ref: "#/components/schemas/IdeaV2"
-              example:
-                - id: "225c5957d7f450baec75a67ede427e9"
-                  name: "Test Idea"
-                  description: "This is a test idea"
-                  tags:
-                    - test
-                  completed: false
+            text/xml:
+              schema:
+                type: array
+                description: The list of ideas registered with the server.
+                items:
+                  $ref: "#/components/schemas/IdeaV2"
+                xml:
+                  name: Ideas
+                  wrapped: true
+
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -408,11 +409,9 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/IdeaV2"
-            example:
-              name: "Test Idea"
-              description: "This is a test idea"
-              tags:
-                - test
+          text/xml:
+            schema:
+              $ref: "#/components/schemas/IdeaV2"
       responses:
         201:
           description: Idea was created.
@@ -425,13 +424,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV2"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
-                tags:
-                  - test
-                completed: false
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV2"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -471,13 +466,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV2"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
-                tags:
-                  - test
-                completed: false
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV2"
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -520,13 +511,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV2"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
-                tags:
-                  - test
-                completed: false
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV2"
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -566,12 +553,9 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/IdeaV2"
-            example:
-              name: "Test Idea"
-              description: "This is a test idea"
-              tags:
-                - test
-              completed: true
+          text/xml:
+            schema:
+              $ref: "#/components/schemas/IdeaV2"
       responses:
         200:
           description: Stored idea
@@ -579,13 +563,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IdeaV2"
-              example:
-                id: "225c5957d7f450baec75a67ede427e9"
-                name: "Test Idea"
-                description: "This is a test idea"
-                tags:
-                  - test
-                completed: false
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/IdeaV2"
         404:
           description: The server could not find any ideas, please submit one and try again.
           content:
@@ -686,12 +666,11 @@ components:
           type: boolean
           description: Whether the service is healthy or not.
           readOnly: true
+          example: true
           xml:
             name: OK
       xml:
         name: Health
-      example:
-        ok: true
 
     HealthV2:
       required:
@@ -703,6 +682,7 @@ components:
           type: boolean
           description: Whether the service is healthy or not.
           readOnly: true
+          example: true
           xml:
             name: OK
         started_at:
@@ -710,13 +690,11 @@ components:
           description: The ISO 8601 datetime at which the service was started.
           format: datetime
           readOnly: true
+          example: "2019-03-14T23:17:27.210333300Z"
           xml:
             name: StartedAt
       xml:
         name: Health
-      example:
-        ok: true
-        started_at: "2019-03-14T23:17:27.210333300Z"
 
     IdeaV1:
       deprecated: true
@@ -730,20 +708,25 @@ components:
           type: string
           description: A unique ID used to identify this idea internally.
           readOnly: true
+          example: "225c5957d7f450baec75a67ede427e9"
+          xml:
+            attribute: true
         name:
           type: string
           description: The short name used to identify this idea.
+          example: Test Idea
+          xml:
+            name: Name
         description:
           type: string
           description:
             A longer description providing more information about this
             idea.
+          example: This is a test idea.
+          xml:
+            name: Description
       xml:
         name: Idea
-      example:
-        id: "225c5957d7f450baec75a67ede427e9"
-        name: "Test Idea"
-        description: "This is a test idea"
 
     IdeaV2:
       required:
@@ -756,14 +739,23 @@ components:
           type: string
           description: A unique ID used to identify this idea internally.
           readOnly: true
+          example: "225c5957d7f450baec75a67ede427e9"
+          xml:
+            attribute: true
         name:
           type: string
           description: The short name used to identify this idea.
+          example: Test Idea
+          xml:
+            name: Name
         description:
           type: string
           description:
             A longer description providing more information about this
             idea.
+          example: This is a test idea.
+          xml:
+            name: Description
         tags:
           maxItems: 10
           minItems: 0
@@ -773,22 +765,178 @@ components:
             maxLength: 50
             type: string
             description: A short string tag describing this idea
+            example: Winter
             xml:
               name: Tag
-              wrapped: true
+          xml:
+            name: Tags
+            wrapped: true
         completed:
           type: boolean
           description: Whether this idea has been completed or not.
           default: false
+          xml:
+            attribute: true
       xml:
         name: Idea
-      example:
-        id: "225c5957d7f450baec75a67ede427e9"
-        name: "Test Idea"
-        description: "This is a test idea"
+
+    IdeaV3:
+      required:
+        - description
+        - name
+      type: object
+      properties:
+        id:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique ID used to identify this idea internally.
+          readOnly: true
+          example: "225c5957d7f450baec75a67ede427e9"
+          xml:
+            attribute: true
+        collection:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique ID used to identify the collection that this idea belongs to.
+          readOnly: true
+          example: "957d25c0baec7557f45a67ed2e427e9"
+          xml:
+            attribute: true
+        name:
+          type: string
+          description: The short name used to identify this idea.
+          example: Test Idea
+          xml:
+            name: Name
+        description:
+          type: string
+          description:
+            A longer description providing more information about this
+            idea.
+          example: This is a test idea.
+          xml:
+            name: Description
         tags:
-          - test
-        completed: false
+          maxItems: 10
+          minItems: 0
+          type: array
+          description: The list of tags you wish to associate with an idea
+          items:
+            maxLength: 50
+            type: string
+            description: A short string tag describing this idea
+            example: Winter
+            xml:
+              name: Tag
+          xml:
+            name: Tags
+            wrapped: true
+        completed:
+          type: boolean
+          description: Whether this idea has been completed or not.
+          default: false
+          xml:
+            attribute: true
+      xml:
+        name: Idea
+
+    CollectionV3:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique ID used to identify this collection internally.
+          readOnly: true
+          example: "957d25c0baec7557f45a67ed2e427e9"
+          xml:
+            name: id
+            attribute: true
+        userId:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique ID used to identify the user that this collection entry belongs to.
+          readOnly: true
+          example: "c0baec767ed2557f957d2545ae427e9"
+          xml:
+            name: user-id
+            attribute: true
+        name:
+          type: string
+          description: The name that the user has given to this collection. This may vary on a per-user basis.
+          example: In the Mountains
+          xml:
+            name: Name
+
+    UserV3:
+      type: object
+      required:
+        - id
+        - emailHash
+        - firstName
+      properties:
+        id:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique ID used to identify the user internally.
+          readOnly: true
+          example: "c0baec767ed2557f957d2545ae427e9"
+          xml:
+            name: id
+            attribute: true
+        emailHash:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique has which represents the user's email address in Gravatar compatible format.
+          readOnly: true
+          example: "7ed2557cc760d2545ae42ef9ba577e9"
+          xml:
+            name: email-hash
+            attribute: true
+        firstName:
+          type: string
+          description: The name that the user wishes to use on the service.
+          readOnly: true
+          example: Bob
+          xml:
+            name: FirstName
+
+    RoleAssignmentV3:
+      type: object
+      required:
+        - userId
+        - collectionId
+        - role
+      properties:
+        userId:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique ID used to identify the user that this role assignment applies to.
+          example: "c0baec767ed2557f957d2545ae427e9"
+          xml:
+            name: user-id
+            attribute: true
+        collectionId:
+          pattern: ^[a-z0-9]{32}$
+          type: string
+          description: A unique ID used to identify the collection that this role assignment applies to.
+          example: "957d25c0baec7557f45a67ed2e427e9"
+          xml:
+            name: collection-id
+            attribute: true
+        role:
+          type: string
+          description: The role that the user has been granted on this collection.
+          example: Owner
+          enum:
+            - Owner
+            - Contributor
+            - Viewer
+          xml:
+            name: role
+            attribute: true
 
     Error:
       type: object

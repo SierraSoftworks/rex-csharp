@@ -16,7 +16,7 @@ namespace Rex.Models
             [XmlAttribute("email-hash")]
             public string? EmailHash { get; set; }
 
-            [XmlElement("first-name")]
+            [XmlElement("FirstName")]
             public string? FirstName { get; set; }
 
             public class Representer : IRepresenter<User, Version3>

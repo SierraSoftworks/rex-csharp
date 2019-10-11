@@ -16,7 +16,7 @@ namespace Rex.Models
             [XmlAttribute("user-id")]
             public string? UserId { get; set; }
 
-            [XmlAttribute("name")]
+            [XmlElement("Name")]
             public string? Name { get; set; }
 
             public class Representer : IRepresenter<Collection, Version3>

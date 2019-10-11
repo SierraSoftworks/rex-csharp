@@ -11,7 +11,7 @@ namespace Rex.Models
         public class Version1 : IView<Idea>
         {
 
-            [XmlAttribute("Id")]
+            [XmlAttribute("id")]
             public string? Id { get; set; }
 
             [XmlElement("Name")]

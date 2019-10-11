@@ -12,7 +12,7 @@ namespace Rex.Models
         public class Version2 : IView<Idea>
         {
 
-            [XmlAttribute("Id")]
+            [XmlAttribute("id")]
             public string? Id { get; set; }
 
             [XmlElement("Name")]
@@ -21,7 +21,7 @@ namespace Rex.Models
             [XmlElement("Description")]
             public string? Description { get; set; }
 
-            [XmlAttribute("Completed")]
+            [XmlAttribute("completed")]
             public bool? Completed { get; set; }
 
             [XmlArray("Tags")]

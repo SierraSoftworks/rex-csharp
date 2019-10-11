@@ -11,10 +11,10 @@ namespace Rex.Models
         [XmlType("Idea")]
         public class Version3 : IView<Idea>
         {
-            [XmlAttribute("CollectionId")]
+            [XmlAttribute("collection-id")]
             public string? Collection { get; set; }
 
-            [XmlAttribute("Id")]
+            [XmlAttribute("id")]
             public string? Id { get; set; }
 
             [XmlElement("Name")]
@@ -23,7 +23,7 @@ namespace Rex.Models
             [XmlElement("Description")]
             public string? Description { get; set; }
 
-            [XmlAttribute("Completed")]
+            [XmlAttribute("completed")]
             public bool? Completed { get; set; }
 
             [XmlArray("Tags")]
