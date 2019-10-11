@@ -85,19 +85,14 @@ namespace Rex.Controllers
 
             var model = Representer.ToModel(idea);
             model.Id = id;
-            model.CollectionId = collection ?? model.CollectionId;
 
-            if (model.CollectionId == Guid.Empty)
-            {
-                model.CollectionId = this.User.GetOid();
-            }
-
-            var role = await RoleStore.GetRoleAssignment(model.CollectionId, User.GetOid()).ConfigureAwait(false);
+            var role = await GetUserRoleOrCreateDefault(collection).ConfigureAwait(false);
             if ((role?.Role ?? RoleAssignment.Viewer) == RoleAssignment.Viewer)
             {
                 return this.Forbid();
             }
 
+            model.CollectionId = role?.CollectionId ?? this.User.GetOid();
             model = await Store.StoreIdeaAsync(model).ConfigureAwait(false);
 
             return Representer.ToView(model);

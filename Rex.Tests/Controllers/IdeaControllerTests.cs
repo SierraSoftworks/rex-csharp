@@ -98,6 +98,70 @@ namespace Rex.Tests.Controllers
         }
 
         [Theory]
+        [InlineData("Administrator", Scopes.IdeasWrite)]
+        [InlineData("User", Scopes.IdeasWrite)]
+        public async Task TestStoreIdea(string role, params string[] scopes)
+        {
+            await Factory.ClearAsync().ConfigureAwait(false);
+
+            var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
+            var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(false);
+
+            idea.Description = "This is an updated description";
+            idea.Completed = true;
+
+            var client = Factory.CreateAuthenticatedClient(role, scopes);
+
+            var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(false);
+            response.Should().NotBeNull();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+
+            view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
+        }
+
+        [Theory]
+        [InlineData("Administrator", Scopes.IdeasWrite)]
+        [InlineData("User", Scopes.IdeasWrite)]
+        public async Task TestStoreIdeaNotFound(string role, params string[] scopes)
+        {
+            await Factory.ClearAsync().ConfigureAwait(false);
+            var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
+            var idea = CreateNewIdea(collection.CollectionId);
+            idea.Id = Guid.NewGuid();
+
+            var client = Factory.CreateAuthenticatedClient(role, scopes);
+
+            var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(false);
+            response.Should().NotBeNull();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+
+            view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
+        }
+
+        [Theory]
+        [InlineData("Administrator")]
+        [InlineData("User")]
+        [InlineData("Administrator", Scopes.IdeasRead, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
+        [InlineData("User", Scopes.IdeasRead, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
+        public async Task TestStoreIdeaInvalidScopes(string role, params string[] scopes)
+        {
+            await Factory.ClearAsync().ConfigureAwait(false);
+            var idea = CreateNewIdea();
+
+            var client = Factory.CreateAuthenticatedClient(role, scopes);
+
+            var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(false);
+            response.Should().NotBeNull();
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Theory]
         [InlineData("Administrator", Scopes.IdeasRead)]
         [InlineData("User", Scopes.IdeasRead)]
         public async Task TestGetRandomIdea(string role, params string[] scopes)
