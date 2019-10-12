@@ -26,16 +26,32 @@ namespace Rex.Controllers
         protected Stores.ICollectionStore CollectionStore { get; }
 
         [HttpGet]
-        [Route("api/[area]/collection/{id:Guid}/users", Name = "GetCollectionRoleAssignments.[area]")]
+        [Route("api/[area]/collection/{collection:Guid}/users", Name = "GetCollectionRoleAssignments.[area]")]
         [Authorize(Scopes.RoleAssignmentsWrite, Roles = "Administrator,User")]
-        public virtual async Task<IEnumerable<T>> GetUsers(Guid id)
-            => (await Store.GetRoleAssignments(id).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView);
+        public virtual async Task<ActionResult<IEnumerable<T>>> GetUsers(Guid collection)
+        {
+            var role = await Store.GetRoleAssignment(collection, User.GetOid()).ConfigureAwait(false);
+            if (role?.Role != RoleAssignment.Owner)
+            {
+                return this.Forbid();
+            }
+
+            return (await Store.GetRoleAssignments(collection).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView).ToActionResult() ?? this.NotFound();
+        }
 
         [HttpGet]
         [Route("api/[area]/collection/{collection:Guid}/user/{user:Guid}")]
         [Authorize(Scopes.RoleAssignmentsWrite, Roles = "Administrator,User")]
         public virtual async Task<ActionResult<T>> GetRoleAssignment(Guid collection, Guid user)
-            => Representer.ToViewOrDefault(await Store.GetRoleAssignment(user, collection).ConfigureAwait(false)).ToActionResult() ?? this.NotFound();
+        {
+            var role = await Store.GetRoleAssignment(collection, User.GetOid()).ConfigureAwait(false);
+            if (role?.Role != RoleAssignment.Owner)
+            {
+                return this.Forbid();
+            }
+
+            return Representer.ToViewOrDefault(await Store.GetRoleAssignment(user, collection).ConfigureAwait(false)).ToActionResult() ?? this.NotFound();
+        }
 
         [HttpPut]
         [Route("api/[area]/collection/{collection:Guid}/user/{user:Guid}")]

@@ -17,7 +17,35 @@ tags:
     description: APIs used to determine the health of a Rex instance.
   - name: ideas
     description: APIs used to manage and retrieve ideas.
+  - name: collections
+    description: APIs used to manage collections of ideas.
+  - name: diagnostics
+    description: APIs used to triage and diagnose problems with the service.
 paths:
+  /api/v1/auth:
+    get:
+      tags:
+        - diagnostics
+
+      summary: Get Authentication Claims (v1)
+      description: Gets the claims that the submitted authorization token offers.
+      operationId: auth_info_v1
+      responses:
+        200:
+          description: List of claims.
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                example:
+                  name: Testy McTesterson
+                  scp: user_impersonation
+                  role: User
+
+        401:
+          $ref: "#/components/responses/Unauthorized"
+
   /api/v1/health:
     get:
       tags:
@@ -1253,6 +1281,381 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /api/v3/collections:
+    get:
+      tags:
+        - collections
+      security:
+        - AzureAD: [Collections.Read]
+
+      summary: Get Collections (v3)
+      description: Gets the list of collections that this user can access.
+      operationId: collections_v3
+      responses:
+        200:
+          description: List of collections.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CollectionV3"
+            text/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CollectionV3"
+                xml:
+                  name: Collections
+                  wrapped: true
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - collections
+      security:
+        - AzureAD: [Collections.Write]
+
+      summary: New Collection (v3)
+      description: Creates a new collection with the provided name.
+      operationId: new_collection_v3
+      requestBody:
+        description: The collection to add to the server.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CollectionV3"
+          text/xml:
+            schema:
+              $ref: "#/components/schemas/CollectionV3"
+      responses:
+        201:
+          description: Collection has been created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionV3"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/CollectionV3"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v3/collection/{collectionId}:
+    get:
+      tags:
+        - collections
+      security:
+        - AzureAD: [Collections.Read]
+
+      summary: Get Collection (v3)
+      description: Gets a collection that a user can access by its ID.
+      operationId: collection_v3
+      parameters:
+        - name: collectionId
+          in: path
+          description: The unique ID of the collection to retrieve.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: 957d25c0baec7557f45a67ed2e427e9
+      responses:
+        200:
+          description: Collection found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionV3"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/CollectionV3"
+        404:
+          description: Collection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: 404
+                error: Not Found
+                description: The resource you were looking for could not be found, please check your request and try again.
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - collections
+      security:
+        - AzureAD: [Collections.Write]
+
+      summary: Remove Collection (v3)
+      description: Removes a collection from a user's list using its ID.
+      operationId: remove_collection_v3
+      parameters:
+        - name: collectionId
+          in: path
+          description: The unique ID of the collection to remove.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: 957d25c0baec7557f45a67ed2e427e9
+      responses:
+        204:
+          description: Collection removed.
+        400:
+          description: Collection has no other owners and cannot be removed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: 400
+                error: Bad Request
+                description: You cannot remove a collection without promoting another user as an owner of the collection.
+        404:
+          description: Collection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: 404
+                error: Not Found
+                description: The resource you were looking for could not be found, please check your request and try again.
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v3/collection/{collectionId}/users:
+    get:
+      tags:
+        - collections
+      security:
+        - AzureAD: [RoleAssignments.Write]
+
+      summary: Get Collection Role Assignments (v3)
+      description: Gets the list of users which can access this collection and their role assignments.
+      operationId: role_assignments_v3
+      parameters:
+        - name: collectionId
+          in: path
+          description: The unique ID of the collection to retrieve users for.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: 957d25c0baec7557f45a67ed2e427e9
+      responses:
+        200:
+          description: List of role assignments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleAssignmentV3"
+            text/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoleAssignmentV3"
+                xml:
+                  name: RoleAssignments
+                  wrapped: true
+        404:
+          description: Collection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: 404
+                error: Not Found
+                description: The resource you were looking for could not be found, please check your request and try again.
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v3/collection/{collectionId}/user/{userId}:
+    get:
+      tags:
+        - collections
+      security:
+        - AzureAD: [RoleAssignments.Write]
+
+      summary: Get User Role Assignment (v3)
+      description: Gets the details of a user's role assignment within a collection.
+      operationId: role_assignment_v3
+      parameters:
+        - name: collectionId
+          in: path
+          description: The unique ID of the collection to retrieve the user from.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: 957d25c0baec7557f45a67ed2e427e9
+        - name: userId
+          in: path
+          description: The unique ID of the user to retrieve.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: c0baec767ed2557f957d2545ae427e9
+      responses:
+        200:
+          description: User role assignment details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleAssignmentV3"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/RoleAssignmentV3"
+        404:
+          description: Collection or role assignment not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: 404
+                error: Not Found
+                description: The resource you were looking for could not be found, please check your request and try again.
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      tags:
+        - collections
+      security:
+        - AzureAD: [RoleAssignments.Write]
+
+      summary: Update User Role Assignment (v3)
+      description: Update the role assignment associated with a user on a given collection.
+      operationId: update_role_assignment_v3
+      parameters:
+        - name: collectionId
+          in: path
+          description: The unique ID of the collection to retrieve the user from.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: 957d25c0baec7557f45a67ed2e427e9
+        - name: userId
+          in: path
+          description: The unique ID of the user to retrieve.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: c0baec767ed2557f957d2545ae427e9
+      requestBody:
+        description: The role assignment to apply for this user when accessing the collection.
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/RoleAssignmentV3'
+          text/xml:
+            schema: 
+              $ref: '#/components/schemas/RoleAssignmentV3'
+      responses:
+        200:
+          description: User role assignment details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleAssignmentV3"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/RoleAssignmentV3"
+        404:
+          description: Collection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: 404
+                error: Not Found
+                description: The resource you were looking for could not be found, please check your request and try again.
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - collections
+      security:
+        - AzureAD: [RoleAssignments.Write]
+
+      summary: Remove User Role Assignment (v3)
+      description: Removes a user's role assignment from a collection.
+      operationId: remove_role_assignment_v3
+      parameters:
+        - name: collectionId
+          in: path
+          description: The unique ID of the collection to retrieve the user from.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: 957d25c0baec7557f45a67ed2e427e9
+        - name: userId
+          in: path
+          description: The unique ID of the user to retrieve.
+          required: true
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{32}$
+            example: c0baec767ed2557f957d2545ae427e9
+      responses:
+        204:
+          description: Role assignment removed.
+        404:
+          description: Collection or role assignment not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: 404
+                error: Not Found
+                description: The resource you were looking for could not be found, please check your request and try again.
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   securitySchemes:
     AzureAD:
@@ -1503,6 +1906,8 @@ components:
           example: In the Mountains
           xml:
             name: Name
+      xml:
+        name: Collection
 
     UserV3:
       type: object
@@ -1536,6 +1941,8 @@ components:
           example: Bob
           xml:
             name: FirstName
+      xml:
+        name: User
 
     RoleAssignmentV3:
       type: object
@@ -1571,6 +1978,8 @@ components:
           xml:
             name: role
             attribute: true
+      xml:
+        name: RoleAssignment
 
     Error:
       type: object
