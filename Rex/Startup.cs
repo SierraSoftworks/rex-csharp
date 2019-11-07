@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 
 namespace Rex
 {
@@ -31,7 +32,7 @@ namespace Rex
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(o => o.AddDefaultPolicy(c => c.AllowCredentials().SetIsOriginAllowed(_ => true)));
+            services.AddCors(o => o.AddDefaultPolicy(c => c.AllowCredentials().WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization).WithOrigins("https://*.sierrasoftworks.com", "http://localhost").AllowAnyMethod().SetIsOriginAllowedToAllowWildcardSubdomains()));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o =>
             {
