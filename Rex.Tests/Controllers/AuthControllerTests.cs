@@ -11,6 +11,7 @@ using System.Net;
 using Xunit.Abstractions;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Linq;
 
 namespace Rex.Tests.Controllers
 {
@@ -34,6 +35,30 @@ namespace Rex.Tests.Controllers
             var response = await client.GetAsync(new Uri("/api/v1/auth", UriKind.Relative)).ConfigureAwait(false);
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
             response.Headers.WwwAuthenticate.Should().NotBeNull().And.ContainEquivalentOf(new AuthenticationHeaderValue("Bearer"));
+        }
+
+        [Theory]
+        [InlineData("GET", "/api/v1/auth")]
+        [InlineData("GET", "/api/v1/auth", "Authorization")]
+        public async Task TestCors(string method, string endpoint, params string[] headers)
+        {
+            var client = Factory.CreateClient();
+
+            using (var request = new HttpRequestMessage(HttpMethod.Options, endpoint))
+            {
+                request.Headers.Add("Access-Control-Request-Method", method);
+                request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
+                request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
+
+                var response = await client.SendAsync(request).ConfigureAwait(false);
+                response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+                response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
+                response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
+                response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
+
+                if (headers.Any())
+                    response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
+            }
         }
 
         [Theory]

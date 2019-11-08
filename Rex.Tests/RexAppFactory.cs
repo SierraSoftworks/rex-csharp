@@ -66,6 +66,7 @@ namespace Rex.Tests
             builder.ConfigureAppConfiguration((builder, config) =>
             {
                 config.AddInMemoryCollection(new[] {
+                    new KeyValuePair<string, string>("AllowedHosts:0", "https://rex.sierrasoftworks.com"),
                     new KeyValuePair<string, string>("Logging:LogLevel:Default", "Information"),
                     new KeyValuePair<string, string>("Storage:Mode", "Memory"),
                 });

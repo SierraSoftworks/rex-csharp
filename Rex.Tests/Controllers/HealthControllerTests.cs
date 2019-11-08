@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Xunit;
 using SierraLib.API.Views;
 using Xunit.Abstractions;
+using System.Net;
+using System.Linq;
 
 namespace Rex.Tests.Controllers
 {
@@ -26,6 +28,29 @@ namespace Rex.Tests.Controllers
         RexAppFactory Factory { get; }
 
         public IRepresenter<Health, TView> Representer { get; }
+
+        [Theory]
+        [InlineData("GET", "/api/{Version}/health", "Authorization")]
+        public async Task TestCors(string method, string endpoint, params string[] headers)
+        {
+            var client = Factory.CreateClient();
+
+            using (var request = new HttpRequestMessage(HttpMethod.Options, endpoint?.Replace("{Version}", this.Version, StringComparison.Ordinal)))
+            {
+                request.Headers.Add("Access-Control-Request-Method", method);
+                request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
+                request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
+
+                var response = await client.SendAsync(request).ConfigureAwait(false);
+                response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+                response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
+                response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
+                response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
+
+                if (headers.Any())
+                    response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
+            }
+        }
 
         [Fact]
         public async Task TestGetHealth()

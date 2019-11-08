@@ -32,7 +32,12 @@ namespace Rex
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(o => o.AddDefaultPolicy(c => c.AllowCredentials().WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization).WithOrigins("https://*.sierrasoftworks.com", "http://localhost").AllowAnyMethod().SetIsOriginAllowedToAllowWildcardSubdomains()));
+            services.AddCors(o => o.AddDefaultPolicy(c => c
+                .AllowCredentials()
+                .AllowAnyMethod()
+                .WithHeaders(HeaderNames.ContentType, HeaderNames.Authorization)
+                .WithOrigins(this.Configuration.GetSection("AllowedHosts").Get<string[]>() ?? Array.Empty<string>())
+                .SetIsOriginAllowedToAllowWildcardSubdomains()));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o =>
             {
@@ -99,14 +104,7 @@ namespace Rex
                 app.UseHttpsRedirection();
             }
 
-            app.UseCors(policy => policy.AllowAnyOrigin().WithMethods("GET"));
-
             app.UseCors();
-            app.Use((context, next) =>
-            {
-                context.Items["__CorsMiddlewareInvoked"] = true;
-                return next();
-            });
 
             app.UseRouting()
                 .UseResponseCompression()
