@@ -31,6 +31,8 @@ namespace Rex.Tests.Controllers
 
         [Theory]
         [InlineData("GET", "/api/{Version}/ideas", "Authorization")]
+        [InlineData("GET", "/api/{Version}/idea/random", "Authorization")]
+        [InlineData("POST", "/api/{Version}/ideas", "Authorization", "Content-Type")]
         public async Task TestCors(string method, string endpoint, params string[] headers)
         {
             var client = Factory.CreateClient();
