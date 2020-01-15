@@ -50,6 +50,8 @@ jobs:
           ArtifactName: rex
   - job: docker
     displayName: Build Docker Image
+    pool:
+      name: Hosted Ubuntu 1604
     steps:
       - task: Docker@2
         displayName: Build and publish Docker image
