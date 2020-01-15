@@ -2,46 +2,62 @@ pool:
   name: Hosted Windows 2019 with VS2019
 
 variables:
-  "dotnetcore.version": "3.0.100"
+  "dotnetcore.version": "3.1.100"
 
-steps:
-  - task: GitVersion@5
-    displayName: GitVersion
-    inputs:
-      updateAssemblyInfo: true
-      preferBundledVersion: false
+jobs:
+  - job: package
+    displayName: Build Package
+    steps:
+      - task: GitVersion@5
+        displayName: GitVersion
+        inputs:
+          updateAssemblyInfo: true
+          preferBundledVersion: false
 
-  - task: DotNetCoreInstaller@1
-    displayName: "Use .NET Core SDK $(dotnetcore.version)"
-    inputs:
-      version: "$(dotnetcore.version)"
+      - task: DotNetCoreInstaller@1
+        displayName: "Use .NET Core SDK $(dotnetcore.version)"
+        inputs:
+          version: "$(dotnetcore.version)"
 
-  - task: DotNetCoreCLI@2
-    displayName: "dotnet build"
+      - task: DotNetCoreCLI@2
+        displayName: "dotnet build"
 
-  - task: DotNetCoreCLI@2
-    displayName: "dotnet test"
-    inputs:
-      command: test
-      arguments: '--collect "Code coverage"'
-      testRunTitle: "General Tests"
+      - task: DotNetCoreCLI@2
+        displayName: "dotnet test"
+        inputs:
+          command: test
+          arguments: '--collect "Code coverage"'
+          testRunTitle: "General Tests"
 
-  - task: DotNetCoreCLI@2
-    displayName: "dotnet publish"
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: Rex/Rex.csproj
-      arguments: "-o $(Build.ArtifactStagingDirectory) --self-contained --runtime linux-x64"
+      - task: DotNetCoreCLI@2
+        displayName: "dotnet publish"
+        inputs:
+          command: publish
+          publishWebProjects: false
+          projects: Rex/Rex.csproj
+          arguments: "-o $(Build.ArtifactStagingDirectory) --self-contained --runtime linux-x64"
 
-  - task: PublishSymbols@2
-    displayName: "Publish symbols path"
-    inputs:
-      SymbolServerType: TeamServices
-      SymbolsProduct: "$(Build.DefinitionName)"
-      SymbolsVersion: "$(GitVersion.SemVer)"
+      - task: PublishSymbols@2
+        displayName: "Publish symbols path"
+        inputs:
+          SymbolServerType: TeamServices
+          SymbolsProduct: "$(Build.DefinitionName)"
+          SymbolsVersion: "$(GitVersion.SemVer)"
 
-  - task: PublishBuildArtifacts@1
-    displayName: "Publish Artifact"
-    inputs:
-      ArtifactName: rex
+      - task: PublishBuildArtifacts@1
+        displayName: "Publish Artifact"
+        inputs:
+          ArtifactName: rex
+  - job: docker
+    displayName: Build Docker Image
+    steps:
+      - task: Docker@2
+        displayName: Build and publish Docker image
+        inputs:
+          command: buildAndPush
+          repository: sierrasoftworks/rex
+          Dockerfile: "**/Dockerfile"
+          containerRegistry: Docker Hub
+          tags: |
+            $(Build.BuildId)
+            latest

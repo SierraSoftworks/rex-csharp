@@ -5,7 +5,14 @@
     <OutputType>Exe</OutputType>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <UserSecretsId>5cdd70c5-9491-453b-b1d0-a307fc53ae64</UserSecretsId>
+    <LangVersion>8.0</LangVersion>
+    <NoWarn>CA1303</NoWarn>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
