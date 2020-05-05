@@ -1,65 +1,132 @@
+trigger:
+- master
+
 pool:
-  name: Hosted Windows 2019 with VS2019
+  vmImage: windows-latest
 
 variables:
-  "dotnetcore.version": "3.1.100"
+  tag: "$(Build.BuildId)"
+  image: sierrasoftworks/rex
+  namespace.staging: rex-staging
+  namespace.prod: rex-prod
+  "dotnetcore.version": "3.1.101"
+  "dotnetcore.runtime": "linux-x64"
 
-jobs:
-  - job: package
-    displayName: Build Package
-    steps:
-      - task: GitVersion@5
-        displayName: GitVersion
-        inputs:
-          updateAssemblyInfo: true
-          preferBundledVersion: false
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+      - job: build_package
+        displayName: Build App Package
+        steps:
+          - task: GitVersion@5
+            displayName: GitVersion
+            inputs:
+              updateAssemblyInfo: true
+              preferBundledVersion: false
 
-      - task: DotNetCoreInstaller@1
-        displayName: "Use .NET Core SDK $(dotnetcore.version)"
-        inputs:
-          version: "$(dotnetcore.version)"
+          - task: UseDotNet@2
+            displayName: Use .NET Core SDK $(dotnetcore.version)
+            inputs:
+              version: $(dotnetcore.version)
 
-      - task: DotNetCoreCLI@2
-        displayName: "dotnet build"
+          - task: DotNetCoreCLI@2
+            displayName: Restore Dependencies
+            inputs:
+              command: restore
 
-      - task: DotNetCoreCLI@2
-        displayName: "dotnet test"
-        inputs:
-          command: test
-          arguments: '--collect "Code coverage"'
-          testRunTitle: "General Tests"
+          - task: DotNetCoreCLI@2
+            displayName: Run Tests
+            inputs:
+              command: test
+              arguments: '--collect "Code coverage"'
+              testRunTitle: "General Tests"
 
-      - task: DotNetCoreCLI@2
-        displayName: "dotnet publish"
-        inputs:
-          command: publish
-          publishWebProjects: false
-          projects: Rex/Rex.csproj
-          arguments: "-o $(Build.ArtifactStagingDirectory) --self-contained --runtime linux-x64"
+          - task: DotNetCoreCLI@2
+            displayName: Build Package
+            inputs:
+              command: publish
+              publishWebProjects: false
+              projects: Rex/Rex.csproj
+              arguments: "-o out --self-contained --runtime $(dotnetcore.runtime)"
 
-      - task: PublishSymbols@2
-        displayName: "Publish symbols path"
-        inputs:
-          SymbolServerType: TeamServices
-          SymbolsProduct: "$(Build.DefinitionName)"
-          SymbolsVersion: "$(GitVersion.SemVer)"
+          - task: PublishSymbols@2
+            displayName: "Publish Symbols"
+            inputs:
+              SymbolServerType: TeamServices
+              SymbolsProduct: "$(Build.DefinitionName)"
+              SymbolsVersion: "$(GitVersion.SemVer)"
 
-      - task: PublishBuildArtifacts@1
-        displayName: "Publish Artifact"
-        inputs:
-          ArtifactName: rex
-  - job: docker
-    displayName: Build Docker Image
-    pool:
-      name: Hosted Ubuntu 1604
-    steps:
-      - task: Docker@2
-        displayName: Build and publish Docker image
-        inputs:
-          command: buildAndPush
-          repository: sierrasoftworks/rex
-          Dockerfile: "**/Dockerfile"
-          containerRegistry: Docker Hub
-          tags: |
-            $(Build.BuildId)
-            latest
+          - publish: ./out
+            artifact: package
+
+      - job: build_docker
+        displayName: Build Docker Image
+        steps:
+          - task: Docker@2
+            displayName: Build Docker Image
+            inputs:
+              command: buildAndPush
+              repository: $(image)
+              Dockerfile: "Dockerfile"
+              containerRegistry: Docker Hub
+              tags: |
+                latest
+                $(tag)
+
+          - publish: ./.deploy
+            artifact: manifests
+
+  - stage: deploy_staging
+    displayName: Deploy (Staging)
+    dependsOn:
+      - build
+    jobs:
+      - deployment: deploy_staging
+        displayName: Deploy Staging
+        environment: staging-rex-sierrasoftworks-com.rex-staging
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: KubernetesManifest@0
+                  name: deploy
+                  displayName: Deploy 
+                  inputs:
+                    action: deploy
+                    namespace: $(namespace.staging)
+                    manifests: $(Pipeline.Workspace)/manifests/*.yml
+
+                    containers: |
+                      $(image):$(tag)
+            postRouteTraffic:
+              steps:
+                - pwsh: Invoke-WebRequest -UseBasicParsing https://staging.rex.sierrasoftworks.com/api/v1/health
+                  displayName: Confirm Website is Available
+
+  - stage: deploy_prod
+    displayName: Deploy (Production)
+    dependsOn:
+      - build
+      - deploy_staging
+    jobs:
+      - deployment: deploy_prod
+        displayName: Deploy Production
+        environment: rex-sierrasoftworks-com.rex-prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: KubernetesManifest@0
+                  name: deploy
+                  displayName: Deploy 
+                  inputs:
+                    action: deploy
+                    namespace: $(namespace.prod)
+                    manifests: $(Pipeline.Workspace)/manifests/*.yml
+                    containers: |
+                      $(image):$(tag)
+            postRouteTraffic:
+              steps:
+                - pwsh: Invoke-WebRequest -UseBasicParsing https://rex.sierrasoftworks.com/api/v1/health
+                  displayName: Confirm Website is Available
