@@ -23,7 +23,7 @@ namespace Rex
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((ctx, config) =>
                 {
-                    if (ctx.HostingEnvironment.IsProduction())
+                    if (!ctx.HostingEnvironment.IsDevelopment())
                     {
                         var builtConfig = config.Build();
 
