@@ -9,7 +9,7 @@ variables:
   image: sierrasoftworks/rex
   namespace.staging: rex-staging
   namespace.prod: rex-prod
-  "dotnetcore.version": "3.1.101"
+  "dotnetcore.version": "3.1.201"
   "dotnetcore.runtime": "linux-x64"
 
 stages:
