@@ -82,6 +82,8 @@ extends:
     staging:
       namespace: rex-staging
       environment: staging-rex-sierrasoftworks-com.rex-staging
+      healthcheck: https://staging.rex.sierrasoftworks.com/api/v2/health
     production:
       namespace: rex-prod
       environment: rex-sierrasoftworks-com.rex-prod
+      healthcheck: https://rex.sierrasoftworks.com/api/v2/health
