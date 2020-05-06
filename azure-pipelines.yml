@@ -62,6 +62,8 @@ stages:
 
       - job: build_docker
         displayName: Build Docker Image
+        pool:
+          vmImage: ubuntu-latest
         steps:
           - task: Docker@2
             displayName: Build Docker Image
