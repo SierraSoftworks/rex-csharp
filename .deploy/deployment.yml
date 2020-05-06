@@ -17,6 +17,7 @@ spec:
       labels:
         app.kubernetes.io/name: rex
         app.kubernetes.io/instance: rex-server
+        aadpodidbinding: rex
     spec:
       containers:
         - name: server
