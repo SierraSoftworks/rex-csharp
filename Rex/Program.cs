@@ -23,10 +23,10 @@ namespace Rex
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((ctx, config) =>
                 {
-                    if (!ctx.HostingEnvironment.IsDevelopment())
-                    {
-                        var builtConfig = config.Build();
+                    var builtConfig = config.Build();
 
+                    if (!string.IsNullOrWhiteSpace(builtConfig.GetConnectionString("ConfigurationKeyVault")))
+                    {
                         var azureServiceTokenProvider = new AzureServiceTokenProvider();
                         var keyVaultClient = new KeyVaultClient(
                             new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback)
