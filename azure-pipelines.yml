@@ -4,7 +4,7 @@ trigger:
 variables:
   tag: '$(Build.BuildId)'
   image: sierrasoftworks/rex
-  "dotnetcore.version": "3.1.201"
+  "dotnetcore.version": "3.1.300"
   "dotnetcore.runtime": "linux-x64"
 
 resources:
