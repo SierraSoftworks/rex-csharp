@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.3.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="3.1.6" />\
     <PackageReference Include="Sentry.AspNetCore" Version="2.1.5" />
-    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.5" />
+    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.7" />
     <PackageReference Include="SierraLib.API.Views" Version="1.0.1" />
   </ItemGroup>
 </Project>
