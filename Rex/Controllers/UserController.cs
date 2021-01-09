@@ -13,7 +13,7 @@ namespace Rex.Controllers
     public abstract class UserController<T> : ControllerBase
         where T : class, IView<User>
     {
-        public UserController(Stores.IUserStore userStore, IRepresenter<User, T> representer)
+        protected UserController(Stores.IUserStore userStore, IRepresenter<User, T> representer)
         {
             UserStore = userStore;
             Representer = representer;

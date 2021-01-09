@@ -17,7 +17,7 @@ namespace Rex.Tests.Controllers
     public abstract class IdeaControllerTests<TView>
         where TView : class, IView<Idea>
     {
-        public IdeaControllerTests(ITestOutputHelper testOutputHelper)
+        protected IdeaControllerTests(ITestOutputHelper testOutputHelper)
         {
             this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
             this.Representer = Factory.Services.GetRequiredService<IRepresenter<Idea, TView>>();
@@ -27,7 +27,7 @@ namespace Rex.Tests.Controllers
 
         protected RexAppFactory Factory { get; }
 
-        public IRepresenter<Idea, TView> Representer { get; }
+        protected IRepresenter<Idea, TView> Representer { get; }
 
         [Theory]
         [InlineData("GET", "/api/{Version}/ideas", "Authorization")]
@@ -70,7 +70,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -90,7 +90,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/problem+json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
         }
 
         [Theory]
@@ -128,7 +128,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -150,7 +150,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -189,7 +189,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -209,7 +209,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/problem+json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
         }
 
         [Theory]
@@ -244,7 +244,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<TView[]>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.ContainEquivalentOf(this.Representer.ToView(idea));
@@ -282,7 +282,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -345,7 +345,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/problem+json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
         }
 
         [Theory]

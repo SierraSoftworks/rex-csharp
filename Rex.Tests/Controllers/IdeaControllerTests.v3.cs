@@ -47,7 +47,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<Idea.Version3>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -95,7 +95,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<Idea.Version3>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -164,7 +164,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<Idea.Version3>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
@@ -196,7 +196,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<Idea.Version3[]>().ConfigureAwait(false);
 
             view.Should().NotBeNull().And.ContainEquivalentOf(this.Representer.ToView(idea));
@@ -241,7 +241,7 @@ namespace Rex.Tests.Controllers
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
             var view = await response.Content.ReadAsAsync<Idea.Version3>().ConfigureAwait(false);
 
             // The collection ID will have been updated, so make sure we do the same.

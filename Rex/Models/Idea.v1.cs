@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Xml.Serialization;
+using Rex.Exceptions;
 using SierraLib.API.Views;
 
 namespace Rex.Models
@@ -33,8 +34,8 @@ namespace Rex.Models
                     {
                         CollectionId = Guid.Empty,
                         Id = view.Id != null ? Guid.Parse(view.Id) : Guid.NewGuid(),
-                        Name = view.Name ?? throw new NullReferenceException("The name of the idea must not be null"),
-                        Description = view.Description ?? throw new NullReferenceException("The description of the idea must not be null"),
+                        Name = view.Name ?? throw new RequiredFieldException(nameof(Idea), nameof(Idea.Name)),
+                        Description = view.Description ?? throw new RequiredFieldException(nameof(Idea), nameof(Idea.Description)),
                         Completed = false,
                         Tags = new System.Collections.Generic.HashSet<string>(),
                     };

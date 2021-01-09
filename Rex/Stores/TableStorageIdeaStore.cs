@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SierraLib.API.Views;
 using System.Globalization;
+using Rex.Exceptions;
+using Rex.Extensions;
 
 namespace Rex.Stores
 {
@@ -140,8 +142,8 @@ namespace Rex.Stores
                     {
                         CollectionId = Guid.ParseExact(view.PartitionKey, "N"),
                         Id = Guid.ParseExact(view.RowKey, "N"),
-                        Name = view.Name ?? throw new NullReferenceException("The name of an idea must not be null"),
-                        Description = view.Description ?? throw new NullReferenceException("The description of an idea must not be null"),
+                        Name = view.Name ?? throw new RequiredFieldException(nameof(Idea), nameof(Idea.Name)),
+                        Description = view.Description ?? throw new RequiredFieldException(nameof(Idea), nameof(Idea.Description)),
                         Completed = view.Completed,
                         Tags = view.Tags?.Split(",")?.Select(t => t.Trim())?.Where(t => !string.IsNullOrEmpty(t))?.ToHashSet() ?? new HashSet<string>()
                     };

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rex.Exceptions;
 using Rex.Models;
 using SierraLib.API.Views;
 
@@ -13,7 +14,7 @@ namespace Rex.Controllers
     public abstract class CollectionController<T> : ControllerBase
         where T : class, IView<Collection>
     {
-        public CollectionController(Stores.ICollectionStore collectionStore, Stores.IRoleAssignmentStore roleStore, Stores.IUserStore userStore, IRepresenter<Collection, T> representer)
+        protected CollectionController(Stores.ICollectionStore collectionStore, Stores.IRoleAssignmentStore roleStore, Stores.IUserStore userStore, IRepresenter<Collection, T> representer)
         {
             CollectionStore = collectionStore;
             RoleStore = roleStore;
@@ -115,8 +116,8 @@ namespace Rex.Controllers
 
             await UserStore.StoreUserAsync(new Models.User {
                 PrincipalId = userOid,
-                FirstName = User.GetClaimOrDefault("given_name") ?? throw new NullReferenceException("Your access token does not include your given name."),
-                EmailHash = User.GetEmailHash() ?? throw new NullReferenceException("Your access token does not include your email address."),
+                FirstName = User.GetClaimOrDefault("given_name") ?? throw new BadRequestException("Your access token does not include your given name."),
+                EmailHash = User.GetEmailHash() ?? throw new BadRequestException("Your access token does not include your email address."),
             }).ConfigureAwait(false);
 
             var collection = await CollectionStore.GetCollectionAsync(userOid, userOid).ConfigureAwait(false);

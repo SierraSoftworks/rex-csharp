@@ -9,7 +9,7 @@ namespace Rex.Controllers
     public abstract class HealthController<T> : ControllerBase
         where T : class, IView<Health>
     {
-        public HealthController(Stores.IHealthStore store, IRepresenter<Health, T> representer)
+        protected HealthController(Stores.IHealthStore store, IRepresenter<Health, T> representer)
         {
             Store = store;
             Representer = representer;

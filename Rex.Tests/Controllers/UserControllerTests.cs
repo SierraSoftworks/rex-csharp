@@ -19,7 +19,7 @@ namespace Rex.Tests.Controllers
         : IClassFixture<WebApplicationFactory<Startup>>
         where TView : class, IView<User>
     {
-        public UserControllerTests(ITestOutputHelper testOutputHelper)
+        protected UserControllerTests(ITestOutputHelper testOutputHelper)
         {
             this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
             this.Representer = this.Factory.Services.GetRequiredService<IRepresenter<User, TView>>();

@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Xml.Serialization;
+using Rex.Exceptions;
 using SierraLib.API.Views;
 
 namespace Rex.Models
@@ -32,7 +33,7 @@ namespace Rex.Models
                     {
                         PrincipalId = view.PrincipalId != null ? Guid.ParseExact(view.PrincipalId, "N") : Guid.Empty,
                         CollectionId = view.CollectionId != null ? Guid.ParseExact(view.CollectionId, "N") : Guid.Empty,
-                        Role = view.Role ?? throw new NullReferenceException("The role name must not be null"),
+                        Role = view.Role ?? throw new RequiredFieldException(nameof(RoleAssignment), nameof(RoleAssignment.Role)),
                     };
                 }
 

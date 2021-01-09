@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 using SierraLib.API.Views;
+using Rex.Exceptions;
 
 namespace Rex.Stores
 {
@@ -117,7 +118,7 @@ namespace Rex.Stores
                     {
                         CollectionId = Guid.ParseExact(view.PartitionKey, "N"),
                         PrincipalId = Guid.ParseExact(view.RowKey, "N"),
-                        Role = view.Role ?? throw new NullReferenceException("The role of a role assignment must not be null")
+                        Role = view.Role ?? throw new RequiredFieldException(nameof(RoleAssignment), nameof(RoleAssignment.Role))
                     };
                 }
 

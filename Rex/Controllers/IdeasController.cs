@@ -16,7 +16,7 @@ namespace Rex.Controllers
     {
         private readonly ILogger<IdeaController<T>> logger;
 
-        public IdeaController(Stores.IIdeaStore store, Stores.IRoleAssignmentStore roleStore, IRepresenter<Idea, T> representer, ILogger<IdeaController<T>> logger)
+        protected IdeaController(Stores.IIdeaStore store, Stores.IRoleAssignmentStore roleStore, IRepresenter<Idea, T> representer, ILogger<IdeaController<T>> logger)
         {
             Store = store;
             RoleStore = roleStore;

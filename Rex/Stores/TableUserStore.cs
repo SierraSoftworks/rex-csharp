@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 using SierraLib.API.Views;
+using Rex.Exceptions;
 
 namespace Rex.Stores
 {
@@ -71,8 +72,8 @@ namespace Rex.Stores
                     return new User
                     {
                         PrincipalId = Guid.ParseExact(view.PartitionKey, "N"),
-                        EmailHash = view.EmailHash ?? throw new NullReferenceException("User's email has must not be null."),
-                        FirstName = view.FirstName ?? throw new NullReferenceException("User's first name must not be null.")
+                        EmailHash = view.EmailHash ?? throw new RequiredFieldException(nameof(User), nameof(User.EmailHash)),
+                        FirstName = view.FirstName ?? throw new RequiredFieldException(nameof(User), nameof(User.FirstName))
                     };
                 }
 

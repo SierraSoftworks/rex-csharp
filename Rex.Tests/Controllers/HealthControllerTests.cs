@@ -17,7 +17,7 @@ namespace Rex.Tests.Controllers
         : IClassFixture<WebApplicationFactory<Startup>>
         where TView : class, IView<Health>
     {
-        public HealthControllerTests(ITestOutputHelper testOutputHelper)
+        protected HealthControllerTests(ITestOutputHelper testOutputHelper)
         {
             this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
             this.Representer = this.Factory.Services.GetRequiredService<IRepresenter<Health, TView>>();
@@ -27,7 +27,7 @@ namespace Rex.Tests.Controllers
 
         RexAppFactory Factory { get; }
 
-        public IRepresenter<Health, TView> Representer { get; }
+        protected IRepresenter<Health, TView> Representer { get; }
 
         [Theory]
         [InlineData("GET", "/api/{Version}/health", "Authorization")]
@@ -60,7 +60,7 @@ namespace Rex.Tests.Controllers
             var response = await client.GetAsync(new Uri($"/api/{Version}/health", UriKind.Relative)).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+            response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
 
             var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
             var model = Representer.ToModel(view);

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using Rex.Exceptions;
 
 namespace Rex
 {
@@ -66,7 +67,7 @@ namespace Rex
                         .RequireClaim("http://schemas.microsoft.com/identity/claims/scope")
                         .RequireAssertion(s => s.User.FindAll(c => c.Type == "http://schemas.microsoft.com/identity/claims/scope" && c.Value.Split(' ').Contains(name)).Any()));
 
-                o.DefaultPolicy = o.GetPolicy("default");
+                o.DefaultPolicy = o.GetPolicy("default") ?? throw new InvalidOperationException("The default policy was not registered correctly.");
             });
 
             services.AddResponseCompression()

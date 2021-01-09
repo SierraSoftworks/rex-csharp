@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 using SierraLib.API.Views;
+using Rex.Exceptions;
 
 namespace Rex.Stores
 {
@@ -116,7 +117,7 @@ namespace Rex.Stores
                     {
                         PrincipalId = Guid.ParseExact(view.PartitionKey, "N"),
                         CollectionId = Guid.ParseExact(view.RowKey, "N"),
-                        Name = view.Name ?? throw new NullReferenceException("Collection name must not be null.")
+                        Name = view.Name ?? throw new RequiredFieldException(nameof(Collection), nameof(Collection.Name))
                     };
                 }
 

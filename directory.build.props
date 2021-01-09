@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <LangVersion>8.0</LangVersion>
+        <LangVersion>preview</LangVersion>
         <NoWarn>CA1303</NoWarn>
         <Nullable>enable</Nullable>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>

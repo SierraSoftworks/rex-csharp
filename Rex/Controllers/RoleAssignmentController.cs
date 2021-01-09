@@ -12,7 +12,7 @@ namespace Rex.Controllers
     public abstract class RoleAssignmentController<T> : ControllerBase
         where T : class, IView<RoleAssignment>
     {
-        public RoleAssignmentController(Stores.IRoleAssignmentStore store, Stores.ICollectionStore collectionStore, IRepresenter<RoleAssignment, T> representer)
+        protected RoleAssignmentController(Stores.IRoleAssignmentStore store, Stores.ICollectionStore collectionStore, IRepresenter<RoleAssignment, T> representer)
         {
             Store = store;
             CollectionStore = collectionStore;

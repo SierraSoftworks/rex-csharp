@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Xml.Serialization;
+using Rex.Exceptions;
 using SierraLib.API.Views;
 
 namespace Rex.Models
@@ -30,9 +31,9 @@ namespace Rex.Models
 
                     return new User
                     {
-                        PrincipalId = Guid.ParseExact(view.Id ?? throw new NullReferenceException("The principal ID of the user must not be null"), "N"),
-                        EmailHash = view.EmailHash ?? throw new NullReferenceException("The email hash of the user must not be null"),
-                        FirstName = view.FirstName ?? throw new NullReferenceException("The name of the user must not be null"),
+                        PrincipalId = Guid.ParseExact(view.Id ?? throw new RequiredFieldException(nameof(User), nameof(User.PrincipalId)), "N"),
+                        EmailHash = view.EmailHash ?? throw new RequiredFieldException(nameof(User), nameof(User.EmailHash)),
+                        FirstName = view.FirstName ?? throw new RequiredFieldException(nameof(User), nameof(User.FirstName)),
                     };
                 }
 
