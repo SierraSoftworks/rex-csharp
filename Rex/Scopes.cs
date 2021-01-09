@@ -14,6 +14,8 @@ namespace Rex
 
         public const string RoleAssignmentsWrite = "RoleAssignments.Write";
 
+        public const string UsersRead = "Users.Read";
+
         public static IEnumerable<string> All()
         {
             yield return IdeasRead;
@@ -21,6 +23,7 @@ namespace Rex
             yield return CollectionsRead;
             yield return CollectionsWrite;
             yield return RoleAssignmentsWrite;
+            yield return UsersRead;
         }
     }
 }

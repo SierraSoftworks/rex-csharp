@@ -7,11 +7,15 @@ using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Rex.Tests
 {
-    public static class Tokens
+    public static class TestTokens
     {
         public const string SigningKey = "your-256-bit-secret";
 
         public static readonly Guid PrincipalId = Guid.Parse("d6cf5e7f-b12a-444d-8c7f-6790b77e49a9");
+
+        public static readonly string EmailAddress = "testy@testerson.com";
+
+        public static readonly string EmailHash = "37b2dd1da1a74fda515b862567c422ef";
 
         public static string GetToken(IEnumerable<string>? roles = null, IEnumerable<string>? scopes = null)
         {
@@ -29,8 +33,8 @@ namespace Rex.Tests
                     ["name"] = "Testy McTesterson",
                     ["given_name"] = "Testy",
                     ["family_name"] = "McTesterson",
-                    ["unique_name"] = "testy@testerson.com",
-                    ["upn"] = "testy@testerson.com",
+                    ["unique_name"] = EmailAddress,
+                    ["upn"] = EmailAddress,
                     ["acr"] = "1",
                     ["amr"] = new[] { "pwd", "mfa" },
                     ["roles"] = roles.ToArray(),

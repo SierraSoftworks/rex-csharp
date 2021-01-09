@@ -81,14 +81,16 @@ namespace Rex
                     services.AddSingleton<Stores.IHealthStore, Stores.MemoryHealthStore>()
                             .AddSingleton<Stores.IIdeaStore, Stores.TableStorageIdeaStore>()
                             .AddSingleton<Stores.ICollectionStore, Stores.TableStorageCollectionStore>()
-                            .AddSingleton<Stores.IRoleAssignmentStore, Stores.TableStorageRoleAssignmentStore>();
+                            .AddSingleton<Stores.IRoleAssignmentStore, Stores.TableStorageRoleAssignmentStore>()
+                            .AddSingleton<Stores.IUserStore, Stores.TableStorageUserStore>();
                     break;
                 case "MEMORY":
                 default:
                     services.AddSingleton<Stores.IHealthStore, Stores.MemoryHealthStore>()
                             .AddSingleton<Stores.IIdeaStore, Stores.MemoryIdeaStore>()
                             .AddSingleton<Stores.ICollectionStore, Stores.MemoryCollectionStore>()
-                            .AddSingleton<Stores.IRoleAssignmentStore, Stores.MemoryRoleAssignmentStore>();
+                            .AddSingleton<Stores.IRoleAssignmentStore, Stores.MemoryRoleAssignmentStore>()
+                            .AddSingleton<Stores.IUserStore, Stores.MemoryUserStore>();
                     break;
             }
 

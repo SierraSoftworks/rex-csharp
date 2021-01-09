@@ -13,16 +13,19 @@ namespace Rex.Controllers
     public abstract class CollectionController<T> : ControllerBase
         where T : class, IView<Collection>
     {
-        public CollectionController(Stores.ICollectionStore store, Stores.IRoleAssignmentStore roleStore, IRepresenter<Collection, T> representer)
+        public CollectionController(Stores.ICollectionStore collectionStore, Stores.IRoleAssignmentStore roleStore, Stores.IUserStore userStore, IRepresenter<Collection, T> representer)
         {
-            Store = store;
+            CollectionStore = collectionStore;
             RoleStore = roleStore;
             Representer = representer;
+            UserStore = userStore;
         }
 
         protected IRepresenter<Collection, T> Representer { get; }
 
-        protected Stores.ICollectionStore Store { get; }
+        protected Stores.ICollectionStore CollectionStore { get; }
+
+        protected Stores.IUserStore UserStore { get; }
 
         protected Stores.IRoleAssignmentStore RoleStore { get; }
 
@@ -33,7 +36,7 @@ namespace Rex.Controllers
         {
             await GetUserCollectionOrCreateAsync().ConfigureAwait(false);
 
-            return (await Store.GetCollectionsAsync(User.GetOid()).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView);
+            return (await CollectionStore.GetCollectionsAsync(User.GetOid()).ToEnumerable().ConfigureAwait(false)).Select(Representer.ToView);
         }
 
         [HttpGet]
@@ -44,7 +47,7 @@ namespace Rex.Controllers
         {
             if ((id ?? User.GetOid()) == User.GetOid())
                 return await GetUserCollectionOrCreateAsync().ConfigureAwait(false);
-            return Representer.ToViewOrDefault(await Store.GetCollectionAsync(User.GetOid(), id ?? User.GetOid()).ConfigureAwait(false)).ToActionResult() ?? this.NotFound();
+            return Representer.ToViewOrDefault(await CollectionStore.GetCollectionAsync(User.GetOid(), id ?? User.GetOid()).ConfigureAwait(false)).ToActionResult() ?? this.NotFound();
         }
 
         [HttpPost]
@@ -66,7 +69,7 @@ namespace Rex.Controllers
                 return this.BadRequest();
             }
 
-            var added = await Store.StoreCollectionAsync(model).ConfigureAwait(false);
+            var added = await CollectionStore.StoreCollectionAsync(model).ConfigureAwait(false);
 
             await RoleStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
@@ -96,7 +99,7 @@ namespace Rex.Controllers
                 }
             }
 
-            if (!await Store.RemoveCollectionAsync(id, User.GetOid()).ConfigureAwait(false))
+            if (!await CollectionStore.RemoveCollectionAsync(id, User.GetOid()).ConfigureAwait(false))
             {
                 return this.NotFound();
             }
@@ -110,10 +113,16 @@ namespace Rex.Controllers
         {
             var userOid = User.GetOid();
 
-            var collection = await Store.GetCollectionAsync(userOid, userOid).ConfigureAwait(false);
+            await UserStore.StoreUserAsync(new Models.User {
+                PrincipalId = userOid,
+                FirstName = User.GetClaimOrDefault("given_name") ?? throw new NullReferenceException("Your access token does not include your given name."),
+                EmailHash = User.GetEmailHash() ?? throw new NullReferenceException("Your access token does not include your email address."),
+            }).ConfigureAwait(false);
+
+            var collection = await CollectionStore.GetCollectionAsync(userOid, userOid).ConfigureAwait(false);
             if (collection == null)
             {
-                collection = await Store.StoreCollectionAsync(new Collection
+                collection = await CollectionStore.StoreCollectionAsync(new Collection
                 {
                     CollectionId = userOid,
                     PrincipalId = userOid,

@@ -20,7 +20,7 @@ namespace Rex.Tests.Controllers
         public HealthControllerTests(ITestOutputHelper testOutputHelper)
         {
             this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
-            this.Representer = this.Factory.Services.GetService<IRepresenter<Health, TView>>();
+            this.Representer = this.Factory.Services.GetRequiredService<IRepresenter<Health, TView>>();
         }
 
         protected abstract string Version { get; }

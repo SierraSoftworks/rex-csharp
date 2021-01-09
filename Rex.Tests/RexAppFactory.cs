@@ -34,11 +34,14 @@ namespace Rex.Tests
 
         public IRoleAssignmentStore RoleAssignmentStore => this.Services.GetRequiredService<IRoleAssignmentStore>();
 
+        public IUserStore UserStore => this.Services.GetRequiredService<IUserStore>();
+
         public async Task ClearAsync()
         {
             await ((IdeaStore as MemoryIdeaStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
             await ((CollectionStore as MemoryCollectionStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
             await ((RoleAssignmentStore as MemoryRoleAssignmentStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
+            await ((UserStore as MemoryUserStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
         }
 
         public HttpClient CreateAuthenticatedClient(string role, params string[] scopes)
@@ -49,7 +52,7 @@ namespace Rex.Tests
         public HttpClient CreateAuthenticatedClient(IEnumerable<string>? roles = null, IEnumerable<string>? scopes = null)
         {
             var client = this.CreateClient();
-            var token = Tokens.GetToken(roles, scopes);
+            var token = TestTokens.GetToken(roles, scopes);
             this.testOutputHelper.WriteLine("Using authentication token {0}", token);
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
@@ -102,7 +105,7 @@ namespace Rex.Tests
                     o.RequireHttpsMetadata = false;
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Tokens.SigningKey)),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(TestTokens.SigningKey)),
                         RequireSignedTokens = true,
 
                         ValidIssuer = "tests",

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SierraLib.API.Views;
@@ -188,7 +189,26 @@ namespace Rex
 
         public static Guid GetOid(this ClaimsPrincipal user)
         {
-            return Guid.ParseExact(user?.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value ?? Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), "D");
+            return Guid.ParseExact(user.GetClaimOrDefault("http://schemas.microsoft.com/identity/claims/objectidentifier") ?? Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), "D");
+        }
+
+        [SuppressMessage("Microsoft.Security", "CA5351", Justification = "MD5 is required for compatibility with Gravatar.")]
+        [SuppressMessage("Microsoft.Globalization", "CA1308", Justification = "Lowercase is required for compatibility with Gravatar.")]
+        public static string? GetEmailHash(this ClaimsPrincipal user)
+        {
+            var email = user.GetClaimOrDefault("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+            if (email is null)
+            {
+                return null;
+            }
+
+            using var md5hash = System.Security.Cryptography.MD5.Create();
+            return string.Join("", Encoding.UTF8.GetBytes(email.ToLowerInvariant().Trim()).Select(b => b.ToString("x2", CultureInfo.InvariantCulture)));
+        }
+
+        public static string? GetClaimOrDefault(this ClaimsPrincipal user, string claim)
+        {
+            return user?.FindFirst(claim)?.Value;
         }
 
         public static TModel? ToModelOrDefault<TView, TModel>(this IRepresenter<TModel, TView> representer, TView? view)

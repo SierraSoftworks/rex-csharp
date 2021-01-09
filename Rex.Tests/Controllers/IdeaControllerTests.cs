@@ -20,7 +20,7 @@ namespace Rex.Tests.Controllers
         public IdeaControllerTests(ITestOutputHelper testOutputHelper)
         {
             this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
-            this.Representer = Factory.Services.GetService<IRepresenter<Idea, TView>>();
+            this.Representer = Factory.Services.GetRequiredService<IRepresenter<Idea, TView>>();
         }
 
         protected abstract string Version { get; }
@@ -398,8 +398,8 @@ namespace Rex.Tests.Controllers
         {
             return new Collection
             {
-                CollectionId = collectionId ?? principalId ?? Tokens.PrincipalId,
-                PrincipalId = principalId ?? Tokens.PrincipalId,
+                CollectionId = collectionId ?? principalId ?? TestTokens.PrincipalId,
+                PrincipalId = principalId ?? TestTokens.PrincipalId,
                 Name = "Test Collection",
             };
         }

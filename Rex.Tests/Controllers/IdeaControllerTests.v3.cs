@@ -35,7 +35,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = roleAssignmentRole,
             }).ConfigureAwait(false);
 
@@ -82,7 +82,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = RoleAssignment.Owner,
             }).ConfigureAwait(false);
 
@@ -128,7 +128,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = roleAssignmentRole,
             }).ConfigureAwait(false);
 
@@ -152,7 +152,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = RoleAssignment.Owner,
             }).ConfigureAwait(false);
             var idea = CreateNewIdea(collection.CollectionId);
@@ -186,7 +186,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = roleAssignmentRole,
             }).ConfigureAwait(false);
 
@@ -229,7 +229,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = collectionRole,
             }).ConfigureAwait(false);
 
@@ -277,7 +277,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = RoleAssignment.Owner,
             }).ConfigureAwait(false);
 
@@ -305,7 +305,7 @@ namespace Rex.Tests.Controllers
             await Factory.RoleAssignmentStore.StoreRoleAssignmentAsync(new RoleAssignment
             {
                 CollectionId = collection.CollectionId,
-                PrincipalId = Tokens.PrincipalId,
+                PrincipalId = TestTokens.PrincipalId,
                 Role = roleAssignmentRole,
             }).ConfigureAwait(false);
 
@@ -326,7 +326,7 @@ namespace Rex.Tests.Controllers
                 throw new ArgumentNullException(nameof(collection));
             }
 
-            if (collection.CollectionId == Tokens.PrincipalId)
+            if (collection.CollectionId == TestTokens.PrincipalId)
                 return base.GetIdeasUri(collection);
 
             return new Uri($"/api/{Version}/collection/{collection.CollectionId.ToString("N", CultureInfo.InvariantCulture)}/ideas", UriKind.Relative);
@@ -339,7 +339,7 @@ namespace Rex.Tests.Controllers
                 throw new ArgumentNullException(nameof(idea));
             }
 
-            if (idea.CollectionId == Tokens.PrincipalId)
+            if (idea.CollectionId == TestTokens.PrincipalId)
                 return base.GetIdeaUri(idea);
 
             return new Uri($"/api/{Version}/collection/{idea.CollectionId.ToString("N", CultureInfo.InvariantCulture)}/idea/{idea.Id.ToString("N", CultureInfo.InvariantCulture)}", UriKind.Relative);
@@ -352,7 +352,7 @@ namespace Rex.Tests.Controllers
                 throw new ArgumentNullException(nameof(collection));
             }
 
-            if (collection.CollectionId == Tokens.PrincipalId)
+            if (collection.CollectionId == TestTokens.PrincipalId)
                 return base.GetRandomIdeaUri(collection);
 
             return new Uri($"/api/{Version}/collection/{collection.CollectionId.ToString("N", CultureInfo.InvariantCulture)}/idea/random", UriKind.Relative);

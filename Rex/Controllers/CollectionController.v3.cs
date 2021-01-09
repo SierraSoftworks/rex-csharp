@@ -11,9 +11,10 @@ namespace Rex.Controllers
     public class CollectionV3Controller : CollectionController<Collection.Version3>
     {
         public CollectionV3Controller(
-            ICollectionStore store,
+            ICollectionStore collectionStore,
             IRoleAssignmentStore roleStore,
-            IRepresenter<Collection, Collection.Version3> representer) : base(store, roleStore, representer)
+            IUserStore userStore,
+            IRepresenter<Collection, Collection.Version3> representer) : base(collectionStore, roleStore, userStore, representer)
         {
         }
     }
