@@ -23,6 +23,12 @@ namespace Rex
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((ctx, config) =>
                 {
+                    // Disable file system monitoring
+                    foreach (var configSource in config.Sources.OfType<Microsoft.Extensions.Configuration.Json.JsonConfigurationSource>())
+                    {
+                        configSource.ReloadOnChange = false;
+                    }
+
                     var builtConfig = config.Build();
 
                     if (!string.IsNullOrWhiteSpace(builtConfig.GetConnectionString("ConfigurationKeyVault")))
