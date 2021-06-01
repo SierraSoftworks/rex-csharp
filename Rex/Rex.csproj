@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.5" />
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="3.1.15" />
-    <PackageReference Include="Sentry.AspNetCore" Version="3.3.4" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.4.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
     <PackageReference Include="SierraLib.API.Views" Version="1.0.3" />
   </ItemGroup>
