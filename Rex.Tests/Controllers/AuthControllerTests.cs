@@ -74,9 +74,9 @@ namespace Rex.Tests.Controllers
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
 
                 var content = await response.Content.ReadAsAsync<Dictionary<string, object>>().ConfigureAwait(false);
-                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/objectidentifier").WhichValue.Should().Be(TestTokens.PrincipalId.ToString());
-                content.Should().ContainKey("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").WhichValue.Should().Be(role);
-                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/scope").WhichValue.Should().Be("user_impersonation Ideas.Read Ideas.Write");
+                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/objectidentifier").WhoseValue.Should().Be(TestTokens.PrincipalId.ToString());
+                content.Should().ContainKey("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").WhoseValue.Should().Be(role);
+                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/scope").WhoseValue.Should().Be("user_impersonation Ideas.Read Ideas.Write");
             }
         }
 
@@ -93,9 +93,9 @@ namespace Rex.Tests.Controllers
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
 
                 var content = await response.Content.ReadAsAsync<Dictionary<string, object>>().ConfigureAwait(false);
-                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/objectidentifier").WhichValue.Should().Be(TestTokens.PrincipalId.ToString());
-                content.Should().ContainKey("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").WhichValue.Should().Be("Administrator");
-                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/scope").WhichValue.Should().Be("user_impersonation Ideas.Read Ideas.Write Collections.Read Collections.Write RoleAssignments.Write");
+                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/objectidentifier").WhoseValue.Should().Be(TestTokens.PrincipalId.ToString());
+                content.Should().ContainKey("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").WhoseValue.Should().Be("Administrator");
+                content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/scope").WhoseValue.Should().Be("user_impersonation Ideas.Read Ideas.Write Collections.Read Collections.Write RoleAssignments.Write");
             }
         }
     }

@@ -65,7 +65,7 @@ namespace Rex.Tests.Controllers
             var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
             var model = Representer.ToModel(view);
 
-            model.StartedAt.Should().BeCloseTo(DateTime.UtcNow);
+            model.StartedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
         }
     }
 }
