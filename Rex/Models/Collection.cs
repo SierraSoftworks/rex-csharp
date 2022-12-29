@@ -1,13 +1,10 @@
-using System;
+namespace Rex.Models;
 
-namespace Rex.Models
+public partial class Collection
 {
-    public partial class Collection
-    {
-        public Guid CollectionId { get; set; }
+    public Guid CollectionId { get; set; }
 
-        public Guid PrincipalId { get; set; }
+    public Guid PrincipalId { get; set; }
 
-        public string Name { get; set; } = "";
-    }
+    public string Name { get; set; } = "";
 }

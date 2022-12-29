@@ -1,94 +1,78 @@
-using FluentAssertions;
-using Rex.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Xunit;
-using SierraLib.API.Views;
-using System.Net;
-using Xunit.Abstractions;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Linq;
+namespace Rex.Tests.Controllers;
 
-namespace Rex.Tests.Controllers
+public abstract class UserControllerTests<TView>
+    : IClassFixture<WebApplicationFactory<Startup>>
+    where TView : class, IView<User>
 {
-    public abstract class UserControllerTests<TView>
-        : IClassFixture<WebApplicationFactory<Startup>>
-        where TView : class, IView<User>
+    protected UserControllerTests(ITestOutputHelper testOutputHelper)
     {
-        protected UserControllerTests(ITestOutputHelper testOutputHelper)
+        this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
+        this.Representer = this.Factory.Services.GetRequiredService<IRepresenter<User, TView>>();
+        TestOutputHelper = testOutputHelper;
+    }
+
+    protected abstract string Version { get; }
+
+    public ITestOutputHelper TestOutputHelper { get; }
+
+    protected RexAppFactory Factory { get; }
+
+    public IRepresenter<User, TView> Representer { get; }
+
+    [Fact]
+    public async Task TestUnauthorized()
+    {
+        var client = Factory.CreateClient();
+
+        var response = await client.GetAsync(new Uri("/api/v3/user/37b2dd1da1a74fda515b862567c422ef", UriKind.Relative)).ConfigureAwait(false);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Headers.WwwAuthenticate.Should().NotBeNull().And.ContainEquivalentOf(new AuthenticationHeaderValue("Bearer"));
+    }
+
+    [Theory]
+    [InlineData("GET", "/api/{Version}/user/{EmailHash}")]
+    [InlineData("GET", "/api/{Version}/user/{EmailHash}", "Authorization")]
+    public async Task TestCors(string method, string endpoint, params string[] headers)
+    {
+        var client = Factory.CreateClient();
+
+        using (var request = new HttpRequestMessage(HttpMethod.Options, endpoint?.Replace("{Version}", this.Version, StringComparison.Ordinal)?.Replace("{EmailHash}", TestTokens.EmailHash, StringComparison.Ordinal)))
         {
-            this.Factory = new RexAppFactory(testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper)));
-            this.Representer = this.Factory.Services.GetRequiredService<IRepresenter<User, TView>>();
-            TestOutputHelper = testOutputHelper;
+            request.Headers.Add("Access-Control-Request-Method", method);
+            request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
+            request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
+
+            var response = await client.SendAsync(request).ConfigureAwait(false);
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+            response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
+            response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
+            response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
+
+            if (headers.Any())
+                response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
         }
+    }
 
-        protected abstract string Version { get; }
+    [Theory]
+    [InlineData("Administrator")]
+    [InlineData("User")]
+    public async Task TestGetExistingUser(string role)
+    {
+        var user = await Factory.UserStore.StoreUserAsync(new User {
+            PrincipalId = TestTokens.PrincipalId,
+            EmailHash = TestTokens.EmailHash,
+            FirstName = "Testy"
+        }).ConfigureAwait(false);
 
-        public ITestOutputHelper TestOutputHelper { get; }
+        var client = Factory.CreateAuthenticatedClient(role, "Users.Read");
 
-        protected RexAppFactory Factory { get; }
-
-        public IRepresenter<User, TView> Representer { get; }
-
-        [Fact]
-        public async Task TestUnauthorized()
+        using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/{Version}/user/{user.EmailHash}"))
         {
-            var client = Factory.CreateClient();
+            var response = await client.SendAsync(request).ConfigureAwait(false);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var response = await client.GetAsync(new Uri("/api/v3/user/37b2dd1da1a74fda515b862567c422ef", UriKind.Relative)).ConfigureAwait(false);
-            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-            response.Headers.WwwAuthenticate.Should().NotBeNull().And.ContainEquivalentOf(new AuthenticationHeaderValue("Bearer"));
-        }
-
-        [Theory]
-        [InlineData("GET", "/api/{Version}/user/{EmailHash}")]
-        [InlineData("GET", "/api/{Version}/user/{EmailHash}", "Authorization")]
-        public async Task TestCors(string method, string endpoint, params string[] headers)
-        {
-            var client = Factory.CreateClient();
-
-            using (var request = new HttpRequestMessage(HttpMethod.Options, endpoint?.Replace("{Version}", this.Version, StringComparison.Ordinal)?.Replace("{EmailHash}", TestTokens.EmailHash, StringComparison.Ordinal)))
-            {
-                request.Headers.Add("Access-Control-Request-Method", method);
-                request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
-                request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
-
-                var response = await client.SendAsync(request).ConfigureAwait(false);
-                response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-                response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
-                response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
-                response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
-
-                if (headers.Any())
-                    response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
-            }
-        }
-
-        [Theory]
-        [InlineData("Administrator")]
-        [InlineData("User")]
-        public async Task TestGetExistingUser(string role)
-        {
-            var user = await Factory.UserStore.StoreUserAsync(new User {
-                PrincipalId = TestTokens.PrincipalId,
-                EmailHash = TestTokens.EmailHash,
-                FirstName = "Testy"
-            }).ConfigureAwait(false);
-
-            var client = Factory.CreateAuthenticatedClient(role, "Users.Read");
-
-            using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/{Version}/user/{user.EmailHash}"))
-            {
-                var response = await client.SendAsync(request).ConfigureAwait(false);
-                response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-                var content = await response.Content.ReadAsAsync<User.Version3>().ConfigureAwait(false);
-                content.Should().BeEquivalentTo(this.Representer.ToView(user));
-            }
+            var content = await response.Content.ReadAsAsync<User.Version3>().ConfigureAwait(false);
+            content.Should().BeEquivalentTo(this.Representer.ToView(user));
         }
     }
 }

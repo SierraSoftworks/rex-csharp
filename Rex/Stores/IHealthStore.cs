@@ -1,9 +1,6 @@
-using System.Threading.Tasks;
+namespace Rex.Stores;
 
-namespace Rex.Stores
+public interface IHealthStore
 {
-    public interface IHealthStore
-    {
-        Task<Models.Health> GetHealthStateAsync();
-    }
+    Task<Models.Health> GetHealthStateAsync();
 }

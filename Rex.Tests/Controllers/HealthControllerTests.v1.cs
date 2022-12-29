@@ -1,16 +1,11 @@
-﻿using Rex.Models;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Xunit.Abstractions;
+﻿namespace Rex.Tests.Controllers;
 
-namespace Rex.Tests.Controllers
+public class HealthControllerV1Tests
+    : HealthControllerTests<Health.Version1>
 {
-    public class HealthControllerV1Tests
-        : HealthControllerTests<Health.Version1>
+    public HealthControllerV1Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        public HealthControllerV1Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-        {
-        }
-
-        protected override string Version => "v1";
     }
+
+    protected override string Version => "v1";
 }

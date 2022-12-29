@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+namespace Rex.Stores;
 
-namespace Rex.Stores
+public interface ICollectionStore
 {
-    public interface ICollectionStore
-    {
-        Task<Models.Collection?> GetCollectionAsync(Guid userId, Guid collectionId);
+    Task<Models.Collection?> GetCollectionAsync(Guid userId, Guid collectionId);
 
-        IAsyncEnumerable<Models.Collection> GetCollectionsAsync(Guid userId);
+    IAsyncEnumerable<Models.Collection> GetCollectionsAsync(Guid userId);
 
-        Task<Models.Collection> StoreCollectionAsync(Models.Collection collection);
+    Task<Models.Collection> StoreCollectionAsync(Models.Collection collection);
 
-        Task<bool> RemoveCollectionAsync(Guid userId, Guid collectionId);
-    }
+    Task<bool> RemoveCollectionAsync(Guid userId, Guid collectionId);
 }

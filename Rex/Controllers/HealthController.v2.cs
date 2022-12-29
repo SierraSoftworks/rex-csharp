@@ -1,17 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Rex.Models;
-using Rex.Stores;
-using SierraLib.API.Views;
+﻿namespace Rex.Controllers;
 
-namespace Rex.Controllers
+[Area("v2")]
+[Route("api/[area]/health")]
+[ApiController]
+public class HealthV2Controller : HealthController<Health.Version2>
 {
-    [Area("v2")]
-    [Route("api/[area]/health")]
-    [ApiController]
-    public class HealthV2Controller : HealthController<Health.Version2>
+    public HealthV2Controller(IHealthStore store, IRepresenter<Health, Health.Version2> representer) : base(store, representer)
     {
-        public HealthV2Controller(IHealthStore store, IRepresenter<Health, Health.Version2> representer) : base(store, representer)
-        {
-        }
     }
 }

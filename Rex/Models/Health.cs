@@ -1,11 +1,8 @@
-using System;
+namespace Rex.Models;
 
-namespace Rex.Models
+public partial class Health
 {
-    public partial class Health
-    {
-        public bool Ok { get; set; }
+    public bool Ok { get; set; }
 
-        public DateTime StartedAt { get; set; }
-    }
+    public DateTime StartedAt { get; set; }
 }
