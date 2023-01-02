@@ -32,7 +32,7 @@ public sealed class XunitLogger : ILogger
         _categoryName = categoryName;
     }
 
-    public IDisposable BeginScope<TState>(TState state)
+    IDisposable? ILogger.BeginScope<TState>(TState state)
         => NoopDisposable.Instance;
 
     public bool IsEnabled(LogLevel logLevel)
@@ -45,7 +45,7 @@ public sealed class XunitLogger : ILogger
             _testOutputHelper.WriteLine(exception.ToString());
     }
 
-    private class NoopDisposable : IDisposable
+    private sealed class NoopDisposable : IDisposable
     {
         public static NoopDisposable Instance = new NoopDisposable();
 

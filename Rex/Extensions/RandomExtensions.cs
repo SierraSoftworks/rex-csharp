@@ -2,11 +2,11 @@ namespace Rex.Extensions;
 
 public static class RandomExtensions
 {
-    public static T Random<T>(this IEnumerable<T> e)
+    public static T? Random<T>(this IEnumerable<T> e)
         where T : notnull => e.RandomWith(new Random());
 
     [SuppressMessage("Microsoft.Security", "CA5394", Justification = "We do not require cryptographically secure random generation for this.")]
-    public static T RandomWith<T>(this IEnumerable<T> e, Random rng)
+    public static T? RandomWith<T>(this IEnumerable<T> e, Random rng)
         where T : notnull
     {
         if (e is null)
@@ -19,7 +19,7 @@ public static class RandomExtensions
             throw new ArgumentNullException(nameof(rng));
         }
 
-        var current = e.First();
+        var current = default(T);
         var count = 0;
 
         foreach (var item in e)

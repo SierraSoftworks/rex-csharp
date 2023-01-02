@@ -57,10 +57,10 @@ public class RexAppFactory : WebApplicationFactory<Startup>
 
         builder.ConfigureAppConfiguration((builder, config) =>
         {
-            config.AddInMemoryCollection(new[] {
-                new KeyValuePair<string, string>("AllowedHosts:0", "https://rex.sierrasoftworks.com"),
-                new KeyValuePair<string, string>("Logging:LogLevel:Default", "Information"),
-                new KeyValuePair<string, string>("Storage:Mode", "Memory"),
+            config.AddInMemoryCollection(new Dictionary<string, string?> {
+                ["AllowedHosts:0"]="https://rex.sierrasoftworks.com",
+                ["Logging:LogLevel:Default"]="Information",
+                ["Storage:Mode"]="Memory",
             });
         })
         .ConfigureLogging((builder, config) =>

@@ -34,8 +34,8 @@ public class Startup
                 ValidateIssuerSigningKey = true,
                 ValidAudiences = new List<string>
                 {
-                    Configuration["Authentication:AppIdUri"],
-                    Configuration["Authentication:ClientId"]
+                    Configuration["Authentication:AppIdUri"]!,
+                    Configuration["Authentication:ClientId"]!
                 },
             };
         });
@@ -61,7 +61,7 @@ public class Startup
 
         services.AddModelRepresentersFromAssembly(typeof(Models.User).Assembly);
 
-        switch (this.Configuration.GetValue<string>("Storage:Mode").ToUpperInvariant())
+        switch (this.Configuration.GetValue<string>("Storage:Mode")?.ToUpperInvariant())
         {
             case "TABLESTORAGE":
                 services.AddSingleton<Stores.IHealthStore, Stores.MemoryHealthStore>()
