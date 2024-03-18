@@ -27,10 +27,10 @@ public class RexAppFactory : WebApplicationFactory<Startup>
 
     public async Task ClearAsync()
     {
-        await ((IdeaStore as MemoryIdeaStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
-        await ((CollectionStore as MemoryCollectionStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
-        await ((RoleAssignmentStore as MemoryRoleAssignmentStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
-        await ((UserStore as MemoryUserStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(false);
+        await ((IdeaStore as MemoryIdeaStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(true);
+        await ((CollectionStore as MemoryCollectionStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(true);
+        await ((RoleAssignmentStore as MemoryRoleAssignmentStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(true);
+        await ((UserStore as MemoryUserStore)?.ClearAsync() ?? Task.Delay(0)).ConfigureAwait(true);
     }
 
     public HttpClient CreateAuthenticatedClient(string role, params string[] scopes)
@@ -50,10 +50,7 @@ public class RexAppFactory : WebApplicationFactory<Startup>
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
-        if (builder is null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
         builder.ConfigureAppConfiguration((builder, config) =>
         {
@@ -76,10 +73,7 @@ public class RexAppFactory : WebApplicationFactory<Startup>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5404", Justification = "We rely on being able to validate test tokens without worrying about the lifetime constraint.")]
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        if (builder is null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
         base.ConfigureWebHost(builder);
 

@@ -17,10 +17,12 @@ public static class TestTokens
 
     public static readonly string EmailHash = "37b2dd1da1a74fda515b862567c422ef";
 
+    private static readonly string[] DefaultScopes = new[] { "user_impersonation" };
+
     public static string GetToken(IEnumerable<string>? roles = null, IEnumerable<string>? scopes = null)
     {
-        roles ??= Array.Empty<string>();
-        scopes = new[] { "user_impersonation" }.Concat(scopes ?? Array.Empty<string>());
+        roles ??= [];
+        scopes = DefaultScopes.Concat(scopes ?? []);
 
         var tokenHandler = new JsonWebTokenHandler();
 

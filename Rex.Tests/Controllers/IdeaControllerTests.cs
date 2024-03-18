@@ -29,13 +29,13 @@ public abstract class IdeaControllerTests<TView>
             request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
             request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
 
-            var response = await client.SendAsync(request).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(true);
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
             response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
             response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
             response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
 
-            if (headers.Any())
+            if (headers?.Length != 0)
                 response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
         }
     }
@@ -45,19 +45,19 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead)]
     public async Task TestGetIdea(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
-        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(false);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
+        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetIdeaUri(idea)).ConfigureAwait(false);
+        var response = await client.GetAsync(GetIdeaUri(idea)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
-        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(true);
 
         view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
     }
@@ -67,12 +67,12 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead)]
     public async Task TestGetIdeaNotFound(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetIdeaUri(CreateNewIdea(collection.CollectionId))).ConfigureAwait(false);
+        var response = await client.GetAsync(GetIdeaUri(CreateNewIdea(collection.CollectionId))).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
@@ -86,11 +86,11 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
     public async Task TestGetIdeaInvalidScopes(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetIdeaUri(CreateNewIdea())).ConfigureAwait(false);
+        var response = await client.GetAsync(GetIdeaUri(CreateNewIdea())).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -100,22 +100,22 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite)]
     public async Task TestStoreIdea(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
-        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(false);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
+        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(true);
 
         idea.Description = "This is an updated description";
         idea.Completed = true;
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(false);
+        var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
-        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(true);
 
         view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
     }
@@ -125,19 +125,19 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite)]
     public async Task TestStoreIdeaNotFound(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
         var idea = CreateNewIdea(collection.CollectionId);
         idea.Id = Guid.NewGuid();
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(false);
+        var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
-        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(true);
 
         view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
     }
@@ -149,12 +149,12 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
     public async Task TestStoreIdeaInvalidScopes(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
         var idea = CreateNewIdea();
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(false);
+        var response = await client.PutAsJsonAsync(GetIdeaUri(idea), this.Representer.ToView(idea)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -164,19 +164,19 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead)]
     public async Task TestGetRandomIdea(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
-        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(false);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
+        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetRandomIdeaUri(collection)).ConfigureAwait(false);
+        var response = await client.GetAsync(GetRandomIdeaUri(collection)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
-        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(true);
 
         view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
     }
@@ -186,12 +186,12 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead)]
     public async Task TestGetRandomIdeaNotFound(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetRandomIdeaUri(collection)).ConfigureAwait(false);
+        var response = await client.GetAsync(GetRandomIdeaUri(collection)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
@@ -205,11 +205,11 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
     public async Task TestGetRandomIdeaInvalidScopes(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetRandomIdeaUri(CreateCollection())).ConfigureAwait(false);
+        var response = await client.GetAsync(GetRandomIdeaUri(CreateCollection())).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -219,19 +219,19 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead)]
     public async Task TestGetIdeas(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
-        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(false);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
+        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetIdeasUri(collection)).ConfigureAwait(false);
+        var response = await client.GetAsync(GetIdeasUri(collection)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
-        var view = await response.Content.ReadAsAsync<TView[]>().ConfigureAwait(false);
+        var view = await response.Content.ReadAsAsync<TView[]>().ConfigureAwait(true);
 
         view.Should().NotBeNull().And.ContainEquivalentOf(this.Representer.ToView(idea));
     }
@@ -243,11 +243,11 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
     public async Task TestGetIdeasInvalidScopes(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.GetAsync(GetIdeasUri(CreateCollection())).ConfigureAwait(false);
+        var response = await client.GetAsync(GetIdeasUri(CreateCollection())).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -257,23 +257,23 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite)]
     public async Task TestAddIdea(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
         var idea = CreateNewIdea(collection.CollectionId);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.PostAsJsonAsync(GetIdeasUri(collection), this.Representer.ToView(idea)).ConfigureAwait(false);
+        var response = await client.PostAsJsonAsync(GetIdeasUri(collection), this.Representer.ToView(idea)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
-        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(true);
 
         view.Should().NotBeNull().And.BeEquivalentTo(this.Representer.ToView(idea));
 
-        var ideas = await Factory.IdeaStore.GetIdeasAsync(collection.CollectionId).ToEnumerable().ConfigureAwait(false);
+        var ideas = await Factory.IdeaStore.GetIdeasAsync(collection.CollectionId).ToEnumerable().ConfigureAwait(true);
 
         var lossyIdea = this.Representer.ToModel(this.Representer.ToView(idea));
         lossyIdea.CollectionId = collection.CollectionId;
@@ -288,11 +288,11 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
     public async Task TestAddIdeaInvalidScopes(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.PostAsJsonAsync(GetIdeasUri(CreateCollection()), this.Representer.ToView(CreateNewIdea())).ConfigureAwait(false);
+        var response = await client.PostAsJsonAsync(GetIdeasUri(CreateCollection()), this.Representer.ToView(CreateNewIdea())).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -302,18 +302,18 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite)]
     public async Task TestRemoveIdea(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
-        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(false);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
+        var idea = await Factory.IdeaStore.StoreIdeaAsync(CreateNewIdea(collection.CollectionId)).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.DeleteAsync(GetIdeaUri(idea)).ConfigureAwait(false);
+        var response = await client.DeleteAsync(GetIdeaUri(idea)).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var storedIdea = await Factory.IdeaStore.GetIdeaAsync(collection.CollectionId, idea.Id).ConfigureAwait(false);
+        var storedIdea = await Factory.IdeaStore.GetIdeaAsync(collection.CollectionId, idea.Id).ConfigureAwait(true);
         storedIdea.Should().BeNull();
     }
 
@@ -322,12 +322,12 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasWrite)]
     public async Task TestRemoveIdeaNotFound(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
-        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
+        var collection = await Factory.CollectionStore.StoreCollectionAsync(CreateCollection()).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.DeleteAsync(GetIdeaUri(CreateNewIdea(collection.CollectionId))).ConfigureAwait(false);
+        var response = await client.DeleteAsync(GetIdeaUri(CreateNewIdea(collection.CollectionId))).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
@@ -341,41 +341,32 @@ public abstract class IdeaControllerTests<TView>
     [InlineData("User", Scopes.IdeasRead, Scopes.CollectionsRead, Scopes.CollectionsWrite, Scopes.RoleAssignmentsWrite)]
     public async Task TestRemoveIdeaInvalidScopes(string role, params string[] scopes)
     {
-        await Factory.ClearAsync().ConfigureAwait(false);
+        await Factory.ClearAsync().ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, scopes);
 
-        var response = await client.DeleteAsync(GetIdeaUri(CreateNewIdea())).ConfigureAwait(false);
+        var response = await client.DeleteAsync(GetIdeaUri(CreateNewIdea())).ConfigureAwait(true);
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     protected virtual Uri GetIdeasUri(Collection collection)
     {
-        if (collection is null)
-        {
-            throw new ArgumentNullException(nameof(collection));
-        }
+        ArgumentNullException.ThrowIfNull(collection, nameof(collection));
 
         return new Uri($"/api/{Version}/ideas", UriKind.Relative);
     }
 
     protected virtual Uri GetIdeaUri(Idea idea)
     {
-        if (idea is null)
-        {
-            throw new ArgumentNullException(nameof(idea));
-        }
+        ArgumentNullException.ThrowIfNull(idea, nameof(idea));
 
         return new Uri($"/api/{Version}/idea/{idea.Id.ToString("N", CultureInfo.InvariantCulture)}", UriKind.Relative);
     }
 
     protected virtual Uri GetRandomIdeaUri(Collection collection)
     {
-        if (collection is null)
-        {
-            throw new ArgumentNullException(nameof(collection));
-        }
+        ArgumentNullException.ThrowIfNull(collection, nameof(collection));
 
         return new Uri($"/api/{Version}/idea/random", UriKind.Relative);
     }

@@ -17,7 +17,7 @@ public class AuthControllerTests
     {
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync(new Uri("/api/v1/auth", UriKind.Relative)).ConfigureAwait(false);
+        var response = await client.GetAsync(new Uri("/api/v1/auth", UriKind.Relative)).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         response.Headers.WwwAuthenticate.Should().NotBeNull().And.ContainEquivalentOf(new AuthenticationHeaderValue("Bearer"));
     }
@@ -35,13 +35,13 @@ public class AuthControllerTests
             request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
             request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
 
-            var response = await client.SendAsync(request).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(true);
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
             response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
             response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
             response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
 
-            if (headers.Any())
+            if (headers?.Length != 0)
                 response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
         }
     }
@@ -55,10 +55,10 @@ public class AuthControllerTests
 
         using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/auth"))
         {
-            var response = await client.SendAsync(request).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(true);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<Dictionary<string, object>>().ConfigureAwait(false);
+            var content = await response.Content.ReadAsAsync<Dictionary<string, object>>().ConfigureAwait(true);
             content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/objectidentifier").WhoseValue.Should().Be(TestTokens.PrincipalId.ToString());
             content.Should().ContainKey("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").WhoseValue.Should().Be(role);
             content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/scope").WhoseValue.Should().Be("user_impersonation Ideas.Read Ideas.Write");
@@ -74,10 +74,10 @@ public class AuthControllerTests
 
         using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/auth"))
         {
-            var response = await client.SendAsync(request).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(true);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<Dictionary<string, object>>().ConfigureAwait(false);
+            var content = await response.Content.ReadAsAsync<Dictionary<string, object>>().ConfigureAwait(true);
             content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/objectidentifier").WhoseValue.Should().Be(TestTokens.PrincipalId.ToString());
             content.Should().ContainKey("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").WhoseValue.Should().Be("Administrator");
             content.Should().ContainKey("http://schemas.microsoft.com/identity/claims/scope").WhoseValue.Should().Be("user_impersonation Ideas.Read Ideas.Write Collections.Read Collections.Write RoleAssignments.Write");

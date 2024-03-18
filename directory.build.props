@@ -1,10 +1,11 @@
 <Project>
     <PropertyGroup>
-        <LangVersion>10.0</LangVersion>
+        <LangVersion>latest</LangVersion>
         <NoWarn>CA1303</NoWarn>
         <Nullable>enable</Nullable>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
         <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>

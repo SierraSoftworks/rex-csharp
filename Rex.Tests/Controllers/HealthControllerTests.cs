@@ -28,13 +28,13 @@ public abstract class HealthControllerTests<TView>
             request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
             request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
 
-            var response = await client.SendAsync(request).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(true);
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
             response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
             response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
             response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
 
-            if (headers.Any())
+            if (headers?.Length != 0)
                 response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
         }
     }
@@ -44,12 +44,12 @@ public abstract class HealthControllerTests<TView>
     {
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync(new Uri($"/api/{Version}/health", UriKind.Relative)).ConfigureAwait(false);
+        var response = await client.GetAsync(new Uri($"/api/{Version}/health", UriKind.Relative)).ConfigureAwait(true);
         response.EnsureSuccessStatusCode();
 
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
 
-        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(false);
+        var view = await response.Content.ReadAsAsync<TView>().ConfigureAwait(true);
         var model = Representer.ToModel(view);
 
         model.StartedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));

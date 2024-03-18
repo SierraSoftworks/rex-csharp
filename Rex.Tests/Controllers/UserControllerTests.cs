@@ -24,7 +24,7 @@ public abstract class UserControllerTests<TView>
     {
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync(new Uri("/api/v3/user/37b2dd1da1a74fda515b862567c422ef", UriKind.Relative)).ConfigureAwait(false);
+        var response = await client.GetAsync(new Uri("/api/v3/user/37b2dd1da1a74fda515b862567c422ef", UriKind.Relative)).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         response.Headers.WwwAuthenticate.Should().NotBeNull().And.ContainEquivalentOf(new AuthenticationHeaderValue("Bearer"));
     }
@@ -42,13 +42,13 @@ public abstract class UserControllerTests<TView>
             request.Headers.Add("Access-Control-Allow-Headers", string.Join(", ", headers));
             request.Headers.Add("Origin", "https://rex.sierrasoftworks.com");
 
-            var response = await client.SendAsync(request).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(true);
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
             response.Headers.GetValues("Access-Control-Allow-Origin").FirstOrDefault().Should().Contain("https://rex.sierrasoftworks.com");
             response.Headers.GetValues("Access-Control-Allow-Methods").FirstOrDefault().Should().Contain(method);
             response.Headers.GetValues("Access-Control-Allow-Credentials").FirstOrDefault().Should().Contain("true");
 
-            if (headers.Any())
+            if (headers?.Length != 0)
                 response.Headers.GetValues("Access-Control-Allow-Headers").FirstOrDefault().Should().ContainAll(headers);
         }
     }
@@ -62,16 +62,16 @@ public abstract class UserControllerTests<TView>
             PrincipalId = TestTokens.PrincipalId,
             EmailHash = TestTokens.EmailHash,
             FirstName = "Testy"
-        }).ConfigureAwait(false);
+        }).ConfigureAwait(true);
 
         var client = Factory.CreateAuthenticatedClient(role, "Users.Read");
 
         using (var request = new HttpRequestMessage(HttpMethod.Get, $"/api/{Version}/user/{user.EmailHash}"))
         {
-            var response = await client.SendAsync(request).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(true);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsAsync<User.Version3>().ConfigureAwait(false);
+            var content = await response.Content.ReadAsAsync<User.Version3>().ConfigureAwait(true);
             content.Should().BeEquivalentTo(this.Representer.ToView(user));
         }
     }
