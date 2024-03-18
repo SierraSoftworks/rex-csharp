@@ -59,7 +59,7 @@ public class RexAppFactory : WebApplicationFactory<Startup>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?> {
                 ["AllowedHosts:0"]="https://rex.sierrasoftworks.com",
-                ["Logging:LogLevel:Default"]="Information",
+                ["Logging:LogLevel:Default"]="Warning",
                 ["Storage:Mode"]="Memory",
             });
         })
@@ -67,7 +67,7 @@ public class RexAppFactory : WebApplicationFactory<Startup>
         {
             config
                 .AddProvider(new XunitLoggerProvider(this.testOutputHelper))
-                .SetMinimumLevel(LogLevel.Debug);
+                .SetMinimumLevel(LogLevel.Warning);
         });
 
         return base.CreateHost(builder);
