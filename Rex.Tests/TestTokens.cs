@@ -9,7 +9,7 @@ namespace Rex.Tests;
 
 public static class TestTokens
 {
-    public const string SigningKey = "your-256-bit-secret";
+    public const string SigningKey = "your-256-bit-secret-signing-key!";
 
     public static readonly Guid PrincipalId = Guid.Parse("d6cf5e7f-b12a-444d-8c7f-6790b77e49a9");
 
