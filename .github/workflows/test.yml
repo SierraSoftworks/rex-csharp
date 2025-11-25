@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v6
       
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v5.0.0
+      uses: actions/setup-dotnet@v5.0.1
       with:
         global-json-file: global.json
       
