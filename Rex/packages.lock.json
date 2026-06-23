@@ -94,9 +94,9 @@
       },
       "SierraLib.API.Views": {
         "type": "Direct",
-        "requested": "[1.0.137, )",
-        "resolved": "1.0.137",
-        "contentHash": "JKwPMHqXs80BhSTkeZfeHCsdphKxmRICJDUIL3X1Ff7BtdQBUNF+tUSJmH+cohUV6lHB4PMGEe4EbRch5OVyrQ==",
+        "requested": "[1.0.145, )",
+        "resolved": "1.0.145",
+        "contentHash": "J92kKuO2qzra/zTRei7XDi8zMZIuDUuEChexu3nszq/fbvLVPAw8+ep/9rpNDXmI1x46bLY8hK0pSXKy0HtL2w==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection": "8.0.0"
         }
