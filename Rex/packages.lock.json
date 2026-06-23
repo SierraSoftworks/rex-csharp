@@ -94,11 +94,11 @@
       },
       "SierraLib.API.Views": {
         "type": "Direct",
-        "requested": "[1.0.145, )",
-        "resolved": "1.0.145",
-        "contentHash": "J92kKuO2qzra/zTRei7XDi8zMZIuDUuEChexu3nszq/fbvLVPAw8+ep/9rpNDXmI1x46bLY8hK0pSXKy0HtL2w==",
+        "requested": "[1.0.160, )",
+        "resolved": "1.0.160",
+        "contentHash": "0atQQfhL8Pgtm36t4nz535xaSNXIQ2L335NG4NKQ9JFdPdbfz0IdnDZz6HlswcNqJtCdA2nD1Bh5a+Qj6A72Ng==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection": "8.0.0"
+          "Microsoft.Extensions.DependencyInjection": "10.0.7"
         }
       },
       "Microsoft.AspNetCore.Authentication.Abstractions": {
@@ -301,16 +301,16 @@
       },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "V8S3bsm50ig6JSyrbcJJ8bW2b9QLGouz+G1miK3UTaOWmMtFwNNNzUf4AleyDWUmTrWMLNnFSLEQtxmxgNQnNQ==",
+        "resolved": "10.0.7",
+        "contentHash": "91F/o3emPV/+xY/ip3s2LqDNF14kjttlVtq0BXgg6p4MnCzeSZxnUJm+t6WRrtD3JdGo88/oX+z7OwK4y8PZuw==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.7"
         }
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
-        "resolved": "8.0.2",
-        "contentHash": "3iE7UF7MQkCv1cxzCahz+Y/guQbTqieyxyaWKhrRO91itI9cOKO76OHeQDahqG4MmW5umr3CcCvGmK92lWNlbg=="
+        "resolved": "10.0.7",
+        "contentHash": "Z6mfFEaFcwCfSboxJwOLfu7/31npCY9q70WUamHW/vRQhDvBKOT4Vf9YkZj5J6hLvJpb0oDEYfHunQZj0xxvKw=="
       },
       "Microsoft.Extensions.Diagnostics.Abstractions": {
         "type": "Transitive",
