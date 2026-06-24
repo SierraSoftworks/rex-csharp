@@ -67,11 +67,11 @@
       },
       "Sentry.AspNetCore": {
         "type": "Direct",
-        "requested": "[4.13.0, )",
-        "resolved": "4.13.0",
-        "contentHash": "1cH9hSvjRbTkcpjUejFTrTC3jMIiOrcZ0DIvt16+AYqXhuxPEnI56npR1nhv+7WUGyhyp5cHFIZqrKnyrrGP0w==",
+        "requested": "[6.6.0, )",
+        "resolved": "6.6.0",
+        "contentHash": "MzS1695uLEYN8sfjmqaBYMg87WAB+YaQjlI/IQp9FVC1D3Kimv+SqptvM5Xzg6tjZZ0NR6AhPTdWs1oP145N5w==",
         "dependencies": {
-          "Sentry.Extensions.Logging": "4.13.0"
+          "Sentry.Extensions.Logging": "6.6.0"
         }
       },
       "SierraLib.API.Views": {
@@ -213,15 +213,15 @@
       },
       "Sentry": {
         "type": "Transitive",
-        "resolved": "4.13.0",
-        "contentHash": "Wfw3M1WpFcrYaGzPm7QyUTfIOYkVXQ1ry6p4WYjhbLz9fPwV23SGQZTFDpdox67NHM0V0g1aoQ4YKLm4ANtEEg=="
+        "resolved": "6.6.0",
+        "contentHash": "1D3xo3P9Y94VQN3RoV/86XqgtylHp1pdeEml3/UB649BrzJeZ/pqO/o8YgJ5g+GqpMQiGI09yjAI7s5ff2A1IA=="
       },
       "Sentry.Extensions.Logging": {
         "type": "Transitive",
-        "resolved": "4.13.0",
-        "contentHash": "yZ5+TtJKWcss6cG17YjnovImx4X56T8O6Qy6bsMC8tMDttYy8J7HJ2F+WdaZNyjOCo0Rfi6N2gc+Clv/5pf+TQ==",
+        "resolved": "6.6.0",
+        "contentHash": "6d5/MLfqfIy2uIlKIFJVtSpT3Z0lY3VlpFPqBP34E1COX1qI+AnrsRKa9v7+wedZDKmBmyTGGzwUZWmmfJfGaw==",
         "dependencies": {
-          "Sentry": "4.13.0"
+          "Sentry": "6.6.0"
         }
       },
       "System.IdentityModel.Tokens.Jwt": {
