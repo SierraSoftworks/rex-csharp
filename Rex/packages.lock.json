@@ -76,9 +76,9 @@
       },
       "SierraLib.API.Views": {
         "type": "Direct",
-        "requested": "[1.0.172, )",
-        "resolved": "1.0.172",
-        "contentHash": "TTHzH4zGk3Ohg5QAqx6aotptj0IlZpKuIdbpAaIHH7/6os2Zh/OGuBGl+Fs/tvuPMGWMtKqx2FP4GNAedi5sWA=="
+        "requested": "[1.0.174, )",
+        "resolved": "1.0.174",
+        "contentHash": "hTbU1K4UBJ7smy4JKD2dtXnNL0m/kSBlBa74C1PtAg+kKAB0MwrOXI3IotaiMZSroYkGuzzPRrV9N+NrRycJPg=="
       },
       "Microsoft.Azure.DocumentDB.Core": {
         "type": "Transitive",
