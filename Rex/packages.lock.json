@@ -4,9 +4,9 @@
     "net10.0": {
       "Microsoft.AspNetCore.Authentication": {
         "type": "Direct",
-        "requested": "[2.3.11, )",
-        "resolved": "2.3.11",
-        "contentHash": "17ZirKkgsBV/nViEeEIzEyB0HalAkeysvykZMMOILNgvUi3cFBRivcaSZ4qwvJfW7S4MG524td4V15Tw2GvTXQ=="
+        "requested": "[2.3.12, )",
+        "resolved": "2.3.12",
+        "contentHash": "7EYcMf1foifnUw1hRhSMg1u9KCSgM1nMFts4/GOSc9cbfs85SSUbwgThmDnefk7omlSRiwyPLHluy3FqZfbWhQ=="
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Direct",
